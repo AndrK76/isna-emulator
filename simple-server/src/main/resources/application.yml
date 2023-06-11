@@ -1,0 +1,17 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./kgd
+    username: usr
+    password: pwd
+  jpa:
+    open-in-view: false
+    show-sql: false
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    root: INFO
