@@ -8,6 +8,7 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
+import ru.igorit.andrk.processors.ProcessorFactory;
 import ru.igorit.andrk.service.StoreService;
 import ru.igorit.andrk.utils.RequestMapper;
 
@@ -24,10 +25,15 @@ public class OpenCloseEndpoint {
 
     private static final Logger log = LoggerFactory.getLogger(OpenCloseEndpoint.class);
 
-    private StoreService storeService;
+    private final StoreService storeService;
+    private final ProcessorFactory processors;
 
-    public OpenCloseEndpoint(StoreService storeService) {
+
+    public OpenCloseEndpoint(
+            StoreService storeService,
+            ProcessorFactory processors) {
         this.storeService = storeService;
+        this.processors = processors;
     }
 
 
@@ -39,6 +45,12 @@ public class OpenCloseEndpoint {
 
         var req = RequestMapper.toModel(msg.getRequest());
         storeService.save(req);
+
+        var processor = processors.getProcessor(req.getServiceId());
+        var res = processor.process(req.getData());
+
+
+        var codes = storeService.getOpenCloseCodes();
 
 
         var msgId = msg.getRequest().getRequestInfo().getMessageId();
@@ -72,5 +84,6 @@ public class OpenCloseEndpoint {
     private <T> JAXBElement<T> createResponseJaxbElement(T object, Class<T> clazz) {
         return new JAXBElement<>(new QName(DEFAULT_NAMESPACE, clazz.getSimpleName()), clazz, object);
     }
+
 
 }
