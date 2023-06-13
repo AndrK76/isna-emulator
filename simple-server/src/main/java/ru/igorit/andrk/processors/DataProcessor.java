@@ -4,4 +4,6 @@ public interface DataProcessor {
     String document();
 
     String process(String data);
+
+    void configure(byte[] config);
 }
