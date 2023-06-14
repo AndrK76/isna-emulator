@@ -15,4 +15,5 @@ spring:
 logging:
   level:
     root: INFO
-    ru.igorit.andrk: DEBUG
+    #ru.igorit.andrk: DEBUG
+    ru.igorit.andrk: TRACE

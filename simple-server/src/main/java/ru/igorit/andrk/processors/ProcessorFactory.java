@@ -49,7 +49,7 @@ public class ProcessorFactory {
                     log.debug("Found {} config for processor {}",cfgTypes[i],procKey);
                 }
             } catch (Exception e) {
-                log.debug("Not found {} config for processor {}",cfgTypes[i],procKey);
+                log.trace("Not found {} config for processor {}",cfgTypes[i],procKey);
             }
         }
         return config;
