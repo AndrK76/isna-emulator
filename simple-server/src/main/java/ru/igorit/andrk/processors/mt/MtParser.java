@@ -177,7 +177,7 @@ public class MtParser {
                         block.getValues().remove(item);
                     }
                     block.getValues().put(item, value);
-                    dataPos += value.length()+1;
+                    dataPos += value.length();
                     inFormat = false;
                 }
             }

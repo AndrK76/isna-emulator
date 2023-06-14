@@ -27,6 +27,7 @@ public class OpenCloseProcessor implements DataProcessor {
             content.getNode("ACCOUNT").setCurrentCode("ACCOUNT_CHANGE");
         }
         MtParser.parseFinal(content,inputFormat);
+        log.debug(content.dumpValues());
 
         return "";
     }

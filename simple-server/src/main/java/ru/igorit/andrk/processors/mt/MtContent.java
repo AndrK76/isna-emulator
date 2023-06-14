@@ -1,11 +1,11 @@
 package ru.igorit.andrk.processors.mt;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MtContent {
@@ -61,5 +61,39 @@ public class MtContent {
         return "MtContent{" +
                 "nodes=" + nodes +
                 '}';
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private class DumpInfo {
+        private String name;
+        private String value;
+        private int order;
+        private long count;
+    }
+
+    public String dumpValues() {
+        var countInfo = getBlocks().stream().flatMap(r -> r.getValues().entrySet().stream())
+                .collect(Collectors.groupingBy(r -> r.getKey().getCode(), Collectors.counting()));
+        var ret = new ArrayList<DumpInfo>();
+        for (var block : getBlocks()) {
+            block.getValues().entrySet().stream().forEach(r ->
+                    ret.add(new DumpInfo(
+                            r.getKey().getCode(),
+                            r.getValue(),
+                            block.getId(),
+                            countInfo.get(r.getKey().getCode()))));
+        }
+        var nl$ = System.lineSeparator();
+        StringBuilder sb = new StringBuilder("Value:" + nl$);
+        ret.stream()
+                .sorted(Comparator.comparing(DumpInfo::getCount)
+                        .thenComparing(DumpInfo::getName)).forEach(r->{
+                            sb.append(r.getName()+"\t"+r.getValue()+"\t"+r.order+nl$);
+                });
+
+        return sb.toString();
     }
 }
