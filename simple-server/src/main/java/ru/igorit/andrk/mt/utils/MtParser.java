@@ -1,7 +1,10 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.mt.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.igorit.andrk.config.ConfigFormatException;
+import ru.igorit.andrk.mt.structure.*;
+import ru.igorit.andrk.service.processors.DataFormatFatalException;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +25,7 @@ public class MtParser {
     }
 
     public static MtContent parsePreview(String rawData, MtFormat format) {
-
+        var content = new MtContent(rawData,format);
         log.debug("parse ");
         log.trace(String.format("on start: %n%s%n", rawData));
         String clearedData = MtParser.clear(rawData);
@@ -32,7 +35,6 @@ public class MtParser {
                 .filter(f -> f.length() > 0)
                 .collect(Collectors.toList());
         int curFmtIdx = -1;
-        var content = new MtContent(format);
 
         for (String str : strings) {
             curFmtIdx = MtParser.parseDataRow(str, content.getNodes(), format.getNodes(), curFmtIdx);
@@ -104,7 +106,7 @@ public class MtParser {
             if (testStr.equals(mask)) {
                 curFmtIdx = i;
                 var idx = content.get(fmt).getBlocks().size();
-                content.get(fmt).getBlocks().add(new MtBlock(idx, str));
+                content.get(fmt).getBlocks().add(new MtBlock(idx, str, content.get(fmt)));
             }
             //log.debug("fmt={}, mask={}, val={}", formats.get(i).getNodeName(), mask, testStr);
         }
@@ -156,8 +158,9 @@ public class MtParser {
                 if (fmtChar != '{') {
                     dataPos++;
                     if (fmtChar != dataChar) {
-                        log.error("Несоответствие строки {} формату", block.getText(), format.getFormatString());
-                        ;
+                        var errText ="Несоответствие строки "+block.getText()+ " формату "+ format.getFormatString();
+                        log.error(errText);
+                        throw new DataFormatFatalException(errText);
                     }
                 } else {
                     inFormat = true;

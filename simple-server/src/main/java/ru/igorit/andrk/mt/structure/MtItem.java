@@ -1,9 +1,14 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.mt.structure;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import ru.igorit.andrk.config.ConfigFormatException;
+import ru.igorit.andrk.mt.utils.MtParser;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Getter
 @Setter
@@ -37,6 +42,17 @@ public class MtItem {
     }
 
     public Object getFormattedValue(String value){
+        if (value==null){
+            return null;
+        }
+        if (type==MtItemType.DATE){
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatString);
+            LocalDateTime ret = LocalDateTime.parse(value, formatter);
+            return ret;
+        } else if (type==MtItemType.INTEGER) {
+            Integer ret = Integer.parseInt(value);
+            return ret;
+        }
         return value;
     }
 

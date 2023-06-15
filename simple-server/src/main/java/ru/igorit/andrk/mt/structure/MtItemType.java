@@ -1,10 +1,11 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.mt.structure;
 
 import lombok.Getter;
 
 public enum MtItemType {
     STRING("x"),
-    DATE("d");
+    DATE("d"),
+    INTEGER("i");
     @Getter
     private String code;
 

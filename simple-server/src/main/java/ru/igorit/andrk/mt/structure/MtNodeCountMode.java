@@ -1,4 +1,4 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.mt.structure;
 
 import lombok.Getter;
 

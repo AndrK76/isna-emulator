@@ -1,4 +1,4 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.mt.structure;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,13 +9,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class MtContent {
+
+    public enum FindNodeType {
+        ByCurrentCode,
+        ByOrigCode
+    }
+
+
     @Getter
     private final Map<MtFormatNodeInfo, MtNode> nodes = new HashMap<>();
 
     @Getter
     private final Map<String, MtItem> items = new HashMap<>();
 
-    public MtContent(MtFormat format) {
+    @Getter
+    private final String rawData;
+
+    public MtContent(String rawData, MtFormat format) {
+        this.rawData=rawData;
         for (var fmt : format.getNodes()) {
             nodes.put(fmt, new MtNode(fmt));
         }
@@ -47,12 +58,37 @@ public class MtContent {
         return getValue(itemCode, 0);
     }
 
-    public MtNode getNode(String code) {
-        var ret = getNodeList().stream().filter(r -> r.getCurrentCode().equals(code)).findFirst();
+    public boolean checkOnEmpty(String itemCode, int level) {
+        if (!getItems().containsKey(itemCode)) {
+            return false;
+        }
+        var item = getItems().get(itemCode);
+        for (var block : getBlocks().stream().filter(r -> r.getId() == level).collect(Collectors.toList())) {
+            if (block.getValues().containsKey(item)) {
+                var val = block.getValues().get(item);
+                if (val!=null || !item.isRequired()){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    public MtNode getNode(String code, FindNodeType findType) {
+        var ret = getNodeList().stream()
+                .filter(r -> code.equals(
+                        findType == FindNodeType.ByCurrentCode ? r.getCurrentCode() : r.getFormat().getNodeName()
+                ))
+                .findFirst();
         if (ret.isPresent()) {
             return ret.get();
         }
         return null;
+    }
+
+    public MtNode getNode(String code) {
+        return getNode(code, FindNodeType.ByCurrentCode);
     }
 
 
@@ -70,28 +106,30 @@ public class MtContent {
     private class DumpInfo {
         private String name;
         private String value;
-        private int order;
-        private long count;
+        private int nodeOrder;
+        private int blockOrder;
     }
 
     public String dumpValues() {
-        var countInfo = getBlocks().stream().flatMap(r -> r.getValues().entrySet().stream())
-                .collect(Collectors.groupingBy(r -> r.getKey().getCode(), Collectors.counting()));
         var ret = new ArrayList<DumpInfo>();
         for (var block : getBlocks()) {
             block.getValues().entrySet().stream().forEach(r ->
                     ret.add(new DumpInfo(
                             r.getKey().getCode(),
                             r.getValue(),
-                            block.getId(),
-                            countInfo.get(r.getKey().getCode()))));
+                            block.getOwnerNode().getOrder(),
+                            block.getId()
+                    )));
         }
         var nl$ = System.lineSeparator();
         StringBuilder sb = new StringBuilder("Value:" + nl$);
         ret.stream()
-                .sorted(Comparator.comparing(DumpInfo::getCount)
-                        .thenComparing(DumpInfo::getName)).forEach(r->{
-                            sb.append(r.getName()+"\t"+r.getValue()+"\t"+r.order+nl$);
+                .sorted(Comparator.comparing(DumpInfo::getNodeOrder)
+                        .thenComparing(DumpInfo::getBlockOrder)
+                        .thenComparing(DumpInfo::getName)).forEach(r -> {
+                    sb.append(
+                            String.format("%-20s\t%3d\t%s%n", r.getName(), r.getBlockOrder(), r.getValue()));
+                    //r.getName()+"\t"+r.getBlockOrder()+"\t"+r.getValue()+nl$);
                 });
 
         return sb.toString();

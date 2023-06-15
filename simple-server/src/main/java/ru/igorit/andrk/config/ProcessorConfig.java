@@ -1,9 +1,8 @@
 package ru.igorit.andrk.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.igorit.andrk.processors.DataProcessor;
+import ru.igorit.andrk.service.processors.DataProcessor;
 
 import java.util.List;
 import java.util.Map;

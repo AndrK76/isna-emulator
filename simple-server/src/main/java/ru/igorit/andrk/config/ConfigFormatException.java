@@ -1,4 +1,4 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.config;
 
 public class ConfigFormatException extends RuntimeException{
     public ConfigFormatException(Throwable cause) {

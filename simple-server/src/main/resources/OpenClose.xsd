@@ -24,6 +24,9 @@
         </xs:complexType>
     </xsd:element>
 
+    <xsd:element name="SendMessageFault1_SendMessageFault" nillable="true" type="ErrorInfo"/>
+
+
     <xs:complexType name="Request">
         <xs:sequence>
             <xs:element minOccurs="1" name="requestInfo" type="RequestInfo">
@@ -215,5 +218,36 @@
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
+
+    <xsd:complexType name="ErrorInfo">
+        <xsd:sequence>
+            <xsd:element minOccurs="1" name="errorCode" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>Код ошибки</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element minOccurs="1" name="errorMessage" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>Сообщение ошибки</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="errorData" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>Дополнительное описание ошибки</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element minOccurs="1" name="errorDate" type="xsd:dateTime">
+                <xsd:annotation>
+                    <xsd:documentation>Дата ошибки</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+            <xsd:element minOccurs="0" name="subError" type="ErrorInfo">
+                <xsd:annotation>
+                    <xsd:documentation>Дочерняя ошибка</xsd:documentation>
+                </xsd:annotation>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+
 
 </xs:schema>

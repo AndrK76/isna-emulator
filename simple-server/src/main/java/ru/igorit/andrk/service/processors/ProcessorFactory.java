@@ -1,4 +1,4 @@
-package ru.igorit.andrk.processors;
+package ru.igorit.andrk.service.processors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

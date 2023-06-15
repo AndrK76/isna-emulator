@@ -11,6 +11,7 @@ import org.springframework.lang.NonNull;
 import javax.annotation.Generated;
 import javax.persistence.*;
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,7 +25,7 @@ public class Request {
 
     @NonNull
     @Column(name = "message_id")
-    private String messageId;
+    private UUID messageId;
 
     @Column(name = "service_id")
     private String serviceId;

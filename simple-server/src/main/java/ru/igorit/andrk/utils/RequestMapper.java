@@ -4,6 +4,7 @@ import org.springframework.lang.NonNull;
 import ru.igorit.andrk.model.Request;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 public class RequestMapper {
     public static Request toModel(@NonNull kz.bee.bip.syncchannel.v10.types.Request soap){
@@ -19,7 +20,7 @@ public class RequestMapper {
 
         var ret = new Request(
                 null,
-                soapInfo.getMessageId(),
+                UUID.fromString(soapInfo.getMessageId()),
                 soapInfo.getServiceId(),
                 reqDate,
                 (String) soap.getRequestData().getData());

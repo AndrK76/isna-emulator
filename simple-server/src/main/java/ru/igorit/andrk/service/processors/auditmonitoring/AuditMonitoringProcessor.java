@@ -1,11 +1,15 @@
-package ru.igorit.andrk.processors;
+package ru.igorit.andrk.service.processors.auditmonitoring;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import ru.igorit.andrk.service.processors.DataProcessor;
+import ru.igorit.andrk.service.processors.ProcessResult;
 
-@Component
-public class AuditMonitoringProcessor implements DataProcessor{
+import java.util.UUID;
+
+@Service
+public class AuditMonitoringProcessor implements DataProcessor {
 
     private static final String DOCUMENT="AUDIT_MONITORING";
     private static final Logger log = LoggerFactory.getLogger(AuditMonitoringProcessor.class);
@@ -16,7 +20,7 @@ public class AuditMonitoringProcessor implements DataProcessor{
     }
 
     @Override
-    public String process(String data) {
+    public ProcessResult process(String data, UUID messageId) {
         return null;
     }
 

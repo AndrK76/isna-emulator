@@ -1,4 +1,4 @@
-package ru.igorit.andrk.processors.mt;
+package ru.igorit.andrk.mt.structure;
 
 import lombok.*;
 
@@ -9,6 +9,7 @@ import lombok.*;
 @EqualsAndHashCode(of = {"nodeName"})
 public class MtFormatNodeInfo {
     private String nodeName;
+    private int order;
     private String searchMask;
     private MtNodeCountMode countMode;
 

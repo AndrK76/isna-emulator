@@ -8,13 +8,17 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import ru.igorit.andrk.processors.ProcessorFactory;
+import ru.igorit.andrk.service.processors.ProcessResult;
+import ru.igorit.andrk.service.processors.ProcessorException;
+import ru.igorit.andrk.service.processors.ProcessorFactory;
 import ru.igorit.andrk.service.StoreService;
 import ru.igorit.andrk.utils.RequestMapper;
 
 import javax.xml.bind.JAXBElement;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.namespace.QName;
+
+import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static ru.igorit.andrk.config.Constants.DEFAULT_NAMESPACE;
@@ -44,21 +48,39 @@ public class OpenCloseEndpoint {
         var msg = message.getValue();
 
         var req = RequestMapper.toModel(msg.getRequest());
-        storeService.save(req);
+        //TODO: to task
+        storeService.saveRequest(req);
 
         var processor = processors.getProcessor(req.getServiceId());
-        var res = processor.process(req.getData());
+        if (processor==null){
+            ErrorInfo err = new ErrorInfo();
+            err.setErrorCode("SE_PROCESSOR");
+            err.setErrorMessage("Не найден сервис обработки "+ req.getServiceId());
+            throw new ProcessorException(err);
+        }
+
+        UUID messageId;
+        try{
+            var msgId = msg.getRequest().getRequestInfo().getMessageId();
+            messageId = UUID.fromString(msgId);
+            if (messageId==null){
+                throw new IllegalArgumentException("Message id is empty");
+            }
+        } catch (IllegalArgumentException e){
+            ErrorInfo err = new ErrorInfo();
+            err.setErrorCode("SVC_ERRFORMAT");
+            err.setErrorMessage("Ошибка в номере сообщения");
+            throw new ProcessorException(err,e);
+        }
+
+        ProcessResult res = processor.process(req.getData(), messageId);
 
 
-        var codes = storeService.getOpenCloseCodes();
-
-
-        var msgId = msg.getRequest().getRequestInfo().getMessageId();
 
         var ret = new SendMessageResponse();
         var resp = new SyncSendMessageResponse();
         var respInfo = new SyncMessageInfoResponse();
-        respInfo.setMessageId(msgId);
+        respInfo.setMessageId(messageId.toString());
         respInfo.setResponseDate(toXmlDate((now())));
         var status = new StatusInfo();
         status.setCode("OK");
