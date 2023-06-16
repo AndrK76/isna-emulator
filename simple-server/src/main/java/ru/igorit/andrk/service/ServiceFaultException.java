@@ -1,6 +1,6 @@
 package ru.igorit.andrk.service;
 
-import kz.bee.bip.syncchannel.v10.types.ErrorInfo;
+import kz.icode.gov.integration.kgd.ErrorInfo;
 import lombok.Getter;
 import lombok.Setter;
 

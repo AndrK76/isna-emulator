@@ -8,6 +8,7 @@ import ru.igorit.andrk.service.processors.ProcessResult;
 @Getter
 @EqualsAndHashCode(of={"id"})
 @RequiredArgsConstructor
+@AllArgsConstructor
 @ToString
 public class OpenCloseResult {
 
@@ -20,4 +21,7 @@ public class OpenCloseResult {
         return new ProcessResult(res.getCode(),res.getText());
     }
 
+    public OpenCloseResult(OpenCloseResult srcRes){
+        this(srcRes.id,srcRes.code, srcRes.getText());
+    }
 }

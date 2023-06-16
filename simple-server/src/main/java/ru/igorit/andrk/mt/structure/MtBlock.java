@@ -19,6 +19,11 @@ public class MtBlock {
 
     private final Map<MtItem, String> values = new HashMap<>();
 
+    public void setItem(MtItem item, Object value) {
+        String formattedVal = item.formatValue(value);
+        values.put(item, formattedVal);
+    }
+
     @Override
     public String toString() {
         return "MtBlock{" +

@@ -210,7 +210,7 @@ public class MtParser {
         return buf2str(dataBuf);
     }
 
-    private static String buf2str(List<Character> buf) {
+    public static String buf2str(List<Character> buf) {
         return buf.stream().map(String::valueOf).collect(Collectors.joining());
     }
 

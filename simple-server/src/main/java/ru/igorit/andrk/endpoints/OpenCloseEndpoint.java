@@ -1,7 +1,7 @@
 package ru.igorit.andrk.endpoints;
 
 
-import kz.bee.bip.syncchannel.v10.types.*;
+import kz.icode.gov.integration.kgd.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;

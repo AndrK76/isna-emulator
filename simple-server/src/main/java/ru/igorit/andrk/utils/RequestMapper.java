@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 public class RequestMapper {
-    public static Request toModel(@NonNull kz.bee.bip.syncchannel.v10.types.Request soap){
+    public static Request toModel(@NonNull kz.icode.gov.integration.kgd.Request soap){
         var soapInfo = soap.getRequestInfo();
         var xmlDate = soapInfo.getMessageDate();
         OffsetDateTime reqDate;

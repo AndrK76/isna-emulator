@@ -13,6 +13,12 @@ public class MtFormat {
     private Map<String,MtBlockFormat> previewFormats = new HashMap<>();
     private Map<String,MtBlockFormat> detailFormats = new HashMap<>();
 
+    private final Map<String, MtItem> items = new HashMap<>();
+
+    public MtItem getItem(String code){
+        return items.get(code);
+    }
+
     @Override
     public String toString() {
         return "MtFormat{" +

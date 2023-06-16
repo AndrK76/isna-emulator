@@ -29,6 +29,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'com.h2database:h2'
 
+    implementation 'org.apache.commons:commons-lang3'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     //testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'

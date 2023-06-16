@@ -23,6 +23,7 @@ public class MtContent {
     private final Map<String, MtItem> items = new HashMap<>();
 
     @Getter
+    @Setter
     private final String rawData;
 
     public MtContent(String rawData, MtFormat format) {
@@ -31,6 +32,11 @@ public class MtContent {
             nodes.put(fmt, new MtNode(fmt));
         }
     }
+
+    public MtContent(MtFormat format) {
+        this("",format);
+    }
+
 
     public List<MtNode> getNodeList() {
         return new ArrayList<>(nodes.values());
@@ -48,7 +54,7 @@ public class MtContent {
         for (var block : getBlocks().stream().filter(r -> r.getId() == level).collect(Collectors.toList())) {
             if (block.getValues().containsKey(item)) {
                 var val = block.getValues().get(item);
-                return item.getFormattedValue(val);
+                return item.extractValue(val);
             }
         }
         return null;
@@ -66,14 +72,13 @@ public class MtContent {
         for (var block : getBlocks().stream().filter(r -> r.getId() == level).collect(Collectors.toList())) {
             if (block.getValues().containsKey(item)) {
                 var val = block.getValues().get(item);
-                if (val!=null || !item.isRequired()){
+                if (val!=null && !val.isEmpty()|| !item.isRequired() ){
                     return true;
                 }
             }
         }
         return false;
     }
-
 
     public MtNode getNode(String code, FindNodeType findType) {
         var ret = getNodeList().stream()

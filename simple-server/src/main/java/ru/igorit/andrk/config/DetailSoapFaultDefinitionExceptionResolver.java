@@ -1,7 +1,7 @@
 package ru.igorit.andrk.config;
 
-import kz.bee.bip.syncchannel.v10.types.ErrorInfo;
-import kz.bee.bip.syncchannel.v10.types.ObjectFactory;
+import kz.icode.gov.integration.kgd.ErrorInfo;
+import kz.icode.gov.integration.kgd.ObjectFactory;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.ws.soap.SoapFault;
 import org.springframework.ws.soap.SoapFaultDetail;

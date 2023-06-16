@@ -19,7 +19,8 @@ public class OpenCloseRequestAccount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
+    @JoinColumn(name = "request_id")
     private OpenCloseRequest request;
 
     @NonNull
@@ -31,7 +32,7 @@ public class OpenCloseRequestAccount {
     private Integer operType;
 
     @Column(name = "account_type")
-    private Integer accountType;
+    private String accountType;
 
     private String bic;
 
@@ -42,6 +43,8 @@ public class OpenCloseRequestAccount {
 
     private String dog;
 
+    @Column(name = "dog_date", columnDefinition = "TIMESTAMP")
+    private LocalDateTime dogDate;
 
 
 }

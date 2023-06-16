@@ -46,7 +46,7 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         var wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("OpenClosePort");
         wsdl11Definition.setLocationUri("/GovKgdService");
-        wsdl11Definition.setTargetNamespace("http://bvu.actualization.arm.isna.kz");
+        wsdl11Definition.setTargetNamespace("http://kgd.integration.gov.icode.kz/");
         wsdl11Definition.setSchema(openCloseSchema);
         return wsdl11Definition;
     }

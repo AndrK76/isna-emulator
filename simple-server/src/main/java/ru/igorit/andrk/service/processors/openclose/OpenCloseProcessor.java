@@ -1,16 +1,18 @@
 package ru.igorit.andrk.service.processors.openclose;
 
-import kz.bee.bip.syncchannel.v10.types.ErrorInfo;
+import kz.icode.gov.integration.kgd.ErrorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import ru.igorit.andrk.config.ConfigFormatException;
 import ru.igorit.andrk.model.OpenCloseRequest;
 import ru.igorit.andrk.model.OpenCloseRequestAccount;
 import ru.igorit.andrk.mt.structure.MtBlock;
 import ru.igorit.andrk.mt.structure.MtContent;
 import ru.igorit.andrk.mt.structure.MtFormat;
+import ru.igorit.andrk.mt.structure.MtNode;
 import ru.igorit.andrk.mt.utils.MtConfigParser;
 import ru.igorit.andrk.mt.utils.MtParser;
 import ru.igorit.andrk.service.StoreService;
@@ -25,6 +27,7 @@ public class OpenCloseProcessor implements DataProcessor {
     private static final Logger log = LoggerFactory.getLogger(OpenCloseProcessor.class);
     private static final String DOCUMENT = "ISNA_BVU_BA_OPEN_CLOSE";
     private final MtFormat inputFormat = new MtFormat();
+    private final MtFormat outputFormat = new MtFormat();
     private final StoreService storeService;
     private Map<String, OpenCloseResult> results = null;
 
@@ -39,42 +42,41 @@ public class OpenCloseProcessor implements DataProcessor {
 
     @Override
     public ProcessResult process(String data, UUID messageId) {
-        MtContent content;
+        MtContent inputContent, outputContent;
+        if (inputFormat.getNodes().size() == 0) {
+            throw processError(new ConfigFormatException("Пустая конфигурация сервиса"), "SVC_CONFIG_ERROR");
+        }
 
         try {
-            content = MtParser.parsePreview(data, inputFormat);
-            validateContentOnFatalErrors(content);
+            inputContent = MtParser.parsePreview(data, inputFormat);
+            validateContentOnFatalErrors(inputContent);
 
-            var codeForm = (String) content.getValue("code_form");
+            var codeForm = (String) inputContent.getValue("code_form");
             if (codeForm.equals("A03")) {
-                content.getNode("ACCOUNT").setCurrentCode("ACCOUNT_CHANGE");
+                inputContent.getNode("ACCOUNT").setCurrentCode("ACCOUNT_CHANGE");
             }
-            MtParser.parseFinal(content, inputFormat);
-            log.debug(content.dumpValues());
+            MtParser.parseFinal(inputContent, inputFormat);
+            log.debug(inputContent.dumpValues());
         } catch (DataFormatFatalException e) {
-            ErrorInfo info = new ErrorInfo();
-            info.setErrorCode("SVC_ERRFORMAT");
-            info.setErrorMessage(e.getMessage());
-            throw new ProcessorException(info, e);
+            throw processError(e, "SVC_DATAFORMAT_ERROR");
         }
 
         OpenCloseRequest request;
+        Map<Integer, OpenCloseResult> accountResult;
         try {
-            request = makeRequestEntity(content, messageId);
-        } catch (RuntimeException e) {
-            ErrorInfo info = new ErrorInfo();
-            info.setErrorCode("SVC_ERRFORMAT");
-            info.setErrorMessage(e.getMessage());
-            throw new ProcessorException(info, e);
+            request = makeRequestEntity(inputContent, messageId);
+            accountResult = makeRequestAccounts(request, inputContent);
+        } catch (Exception e) {
+            throw processError(e, "SVC_DATAFORMAT_ERROR");
         }
 
+        request = storeService.saveOpenCloseRequest(request);
+
         try {
-            makeRequestAccounts(request, content);
-        } catch (DataContentException e) {
-            log.error(e.getDataErrorMessage() +
-                    (e.getCause() == null
-                            ? ""
-                            : " " + e.getCause().getClass().getSimpleName() + ": " + e.getCause().getMessage()));
+            outputContent = new MtContent(outputFormat);
+            fillOutContent(outputContent, outputFormat, request, accountResult);
+        } catch (Exception e) {
+            throw processError(e, "SVC_DATACOMPOSE_ERROR");
         }
 
 
@@ -88,12 +90,14 @@ public class OpenCloseProcessor implements DataProcessor {
     public void configure(byte[] config) {
         log.debug("apply config");
         MtConfigParser.parseInputFormatFromXML(config, inputFormat);
+        MtConfigParser.parseOutputFormatFromXML(config, outputFormat);
+
         log.trace("Input Config: {}", inputFormat);
-        results = getResultValues(config);
+        results = initResultValues(config);
         log.trace("Results: {}", results);
     }
 
-    private Map<String, OpenCloseResult> getResultValues(byte[] config) {
+    private Map<String, OpenCloseResult> initResultValues(byte[] config) {
         Map<String, OpenCloseResult> resList = new HashMap<>();
         NodeList resCfg = MtConfigParser.getCustomSection(config, "results");
         if (resCfg.getLength() != 0) {
@@ -112,13 +116,29 @@ public class OpenCloseProcessor implements DataProcessor {
                     var res = new OpenCloseResult(attrs.get("id"),
                             attrs.getOrDefault("code", ""));
                     if (node.getChildNodes().getLength() > 0) {
-                        res.setText(node.getChildNodes().item(0).getNodeValue());
+                        List<Node> valueNodes = new ArrayList<>();
+                        for (int j = 0; j < node.getChildNodes().getLength(); j++) {
+                            valueNodes.add(node.getChildNodes().item(j));
+                        }
+                        Optional<Node> valNode = valueNodes.stream()
+                                .filter(r -> r.getNodeType() == Node.CDATA_SECTION_NODE).findFirst();
+                        if (!valNode.isPresent()) {
+                            valNode = Optional.of(valueNodes.get(0));
+                        }
+                        res.setText(valNode.get().getNodeValue());
                     }
                     resList.put(res.getId(), res);
                 }
             }
         }
         return resList;
+    }
+
+    private ProcessorException processError(Exception e, String code) {
+        ErrorInfo info = new ErrorInfo();
+        info.setErrorCode(code);
+        info.setErrorMessage(e.getMessage());
+        return new ProcessorException(info, e);
     }
 
     private void validateContentOnFatalErrors(MtContent content) {
@@ -144,13 +164,14 @@ public class OpenCloseProcessor implements DataProcessor {
     }
 
     private Map<Integer, OpenCloseResult> makeRequestAccounts(OpenCloseRequest request, MtContent content) {
+        Map<Integer, OpenCloseResult> parseDataResult = new HashMap<>();
         try {
             var accountBlocks = content.getBlocks().stream()
                     .filter(r -> r.getOwnerNode().getFormat().getNodeName().equals("ACCOUNT"))
                     .sorted(Comparator.comparing(MtBlock::getId))
                     .collect(Collectors.toList());
-            Set<String> emptyItems = new HashSet<>();
             for (var block : accountBlocks) {
+                Set<String> emptyItems = new HashSet<>();
                 var id = block.getId();
                 OpenCloseRequestAccount account = new OpenCloseRequestAccount();
                 request.getAccounts().add(account);
@@ -158,9 +179,38 @@ public class OpenCloseProcessor implements DataProcessor {
                 account.setSort(id);
                 account.setAccount((String) getBlockValue("account", content, emptyItems, id));
                 account.setOperType((Integer) getBlockValue("oper_type", content, emptyItems, id));
+                account.setBic((String) getBlockValue("bic", content, emptyItems, id));
+                account.setAccountType((String) getBlockValue("account_type", content, emptyItems, id));
+                account.setOperDate((LocalDateTime) getBlockValue("oper_date", content, emptyItems, id));
+                account.setRnn((String) getBlockValue("rnn", content, emptyItems, id));
+                account.setDog((String) getBlockValue("dog", content, emptyItems, id));
+
+                OpenCloseResult parseRowResult;
+                if (emptyItems.size() > 0) {
+                    parseRowResult = new OpenCloseResult(results.get("EMPTY_FIELD"));
+                    parseRowResult.setText(
+                            parseRowResult.getText().replace("%%{FIELD}%%",
+                                    emptyItems.stream().collect(Collectors.joining(", "))));
+                } else if (!checkTypeOper(account)) {
+                    parseRowResult = new OpenCloseResult(results.get("INVALID_OPER_TYPE"));
+                    parseRowResult.setText(
+                            parseRowResult.getText().replace("%%{TYPE_OPER}%%",
+                                    account.getOperType().toString()));
+                    parseRowResult.setText(
+                            parseRowResult.getText().replace("%%{CODE_FORM}%%",
+                                    account.getRequest().getCodeForm()));
+                } else if (!checkTypeAccount(account)) {
+                    parseRowResult = new OpenCloseResult(results.get("INVALID_ACC_TYPE"));
+                    parseRowResult.setText(
+                            parseRowResult.getText().replace("%%{ACC_TYPE}%%",
+                                    account.getAccountType()));
+                } else {
+                    parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
+                }
+                parseDataResult.put(id, parseRowResult);
             }
 
-            return null;
+            return parseDataResult;
         } catch (Exception e) {
             if (e instanceof DataContentException) {
                 throw e;
@@ -186,5 +236,69 @@ public class OpenCloseProcessor implements DataProcessor {
         }
     }
 
+    //TODO: захардкожено, можно тоже в настройки вынести секцией
+    private boolean checkTypeOper(OpenCloseRequestAccount accountInfo) {
+        String codeForm = accountInfo.getRequest().getCodeForm();
+        int operType = accountInfo.getOperType();
+        if (codeForm.equals("A01") && (operType == 1 || operType == 2)) {
+            return true;
+        } else if (codeForm.equals("A03") && operType == 9) {
+            return true;
+        }
+        return false;
+    }
+
+    //TODO: захардкожено, можно тоже в настройки вынести секцией
+    private boolean checkTypeAccount(OpenCloseRequestAccount accountInfo) {
+        String accType = accountInfo.getAccountType();
+        var validTypes = new String[]{"00", "05", "09", "20"};
+        return Arrays.asList(validTypes).contains(accType);
+    }
+
+    private void fillOutContent(MtContent content,
+                                MtFormat format,
+                                OpenCloseRequest data,
+                                Map<Integer, OpenCloseResult> processResult) {
+        String[] constantNodeNames = new String[]{"HEAD", "ID", "MT_FORM", "SUBJECT"};
+        Arrays.stream(constantNodeNames).forEach(n -> {
+            var node = content.getNode(n, MtContent.FindNodeType.ByOrigCode);
+            var block = new MtBlock(0, "", node);
+            node.getBlocks().add(block);
+        });
+        String respCodeForm = data.getCodeForm().equals("A01") ? "A1C" : "A3C";
+
+        var idBlock = content.getNode("ID").getBlocks().get(0);
+        idBlock.setItem(format.getItem("reference"), data.getReference());
+
+        var subjBlock = content.getNode("SUBJECT").getBlocks().get(0);
+        subjBlock.setItem(format.getItem("code_form"), respCodeForm);
+        subjBlock.setItem(format.getItem("notify_date"), LocalDateTime.now());
+        subjBlock.setItem(format.getItem("name_form"),
+                respCodeForm.equals("A1C")
+                        ? "Подтв. о получ. увед. об откр. и закр. банк. счетов"
+                        : "Подтв.о получ.увед.об измен.номеров банк.счетов");
+
+        MtNode accNode = respCodeForm.equals("A1C")
+                ? content.getNode("ACCOUNT")
+                : content.getNode("ACCOUNT_CHANGE");
+        for (var account : data.getAccounts()) {
+            var accBlock = new MtBlock(account.getSort(), "", accNode);
+            accNode.getBlocks().add(accBlock);
+            accBlock.setItem(format.getItem("bic"),account.getBic());
+            accBlock.setItem(format.getItem("account"),account.getAccount());
+            accBlock.setItem(format.getItem("account_type"),account.getAccountType());
+            accBlock.setItem(format.getItem("oper_type"),account.getOperType());
+            accBlock.setItem(format.getItem("oper_date"),account.getOperDate());
+            accBlock.setItem(format.getItem("rnn"),account.getRnn());
+            var res = processResult.get(account.getSort());
+            accBlock.setItem(format.getItem("result_code"),res.getCode());
+            accBlock.setItem(format.getItem("result_name"),res.getText());
+            accBlock.setItem(format.getItem("dog"),account.getDog());
+            accBlock.setItem(format.getItem("dog_date"),account.getDogDate());
+        }
+
+
+        log.debug("start make data");
+    }
 
 }

@@ -8,9 +8,7 @@ import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -37,8 +35,7 @@ public class OpenCloseRequest {
     @Column(name = "notify_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime notifyDate;
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinTable(inverseJoinColumns=@JoinColumn(name="request_id"))
-    private Set<OpenCloseRequestAccount> accounts = new HashSet<>();
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "request", cascade = CascadeType.ALL)
+    private List<OpenCloseRequestAccount> accounts = new ArrayList<>();
 
 }

@@ -9,6 +9,10 @@ spring:
   jpa:
     open-in-view: false
     show-sql: false
+    #show-sql: true
+    hibernate:
+      ddl-auto: none
+      #ddl-auto: validate
   flyway:
     enabled: true
 
@@ -17,3 +21,5 @@ logging:
     root: INFO
     ru.igorit.andrk: DEBUG
     #ru.igorit.andrk: TRACE
+    #org.hibernate.SQL: DEBUG
+    #org.hibernate.type.descriptor.sql.BasicBinder: TRACE

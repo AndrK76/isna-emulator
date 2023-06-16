@@ -1,5 +1,5 @@
 package ru.igorit.andrk.config;
 
 public interface Constants {
-    String DEFAULT_NAMESPACE = "http://bip.bee.kz/SyncChannel/v10/Types";
+    String DEFAULT_NAMESPACE = "http://kgd.integration.gov.icode.kz/";
 }
