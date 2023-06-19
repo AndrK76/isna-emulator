@@ -9,10 +9,10 @@ import org.w3c.dom.NodeList;
 import ru.igorit.andrk.config.ConfigFormatException;
 import ru.igorit.andrk.model.OpenCloseRequest;
 import ru.igorit.andrk.model.OpenCloseRequestAccount;
-import ru.igorit.andrk.mt.structure.MtBlock;
-import ru.igorit.andrk.mt.structure.MtContent;
-import ru.igorit.andrk.mt.structure.MtFormat;
-import ru.igorit.andrk.mt.structure.MtNode;
+import ru.igorit.andrk.model.OpenCloseResponse;
+import ru.igorit.andrk.model.OpenCloseResponseAccount;
+import ru.igorit.andrk.mt.structure.*;
+import ru.igorit.andrk.mt.utils.MtComposer;
 import ru.igorit.andrk.mt.utils.MtConfigParser;
 import ru.igorit.andrk.mt.utils.MtParser;
 import ru.igorit.andrk.service.StoreService;
@@ -65,23 +65,24 @@ public class OpenCloseProcessor implements DataProcessor {
         Map<Integer, OpenCloseResult> accountResult;
         try {
             request = makeRequestEntity(inputContent, messageId);
-            accountResult = makeRequestAccounts(request, inputContent);
+            accountResult = makeRequestAccounts(request, inputContent, inputFormat);
         } catch (Exception e) {
             throw processError(e, "SVC_DATAFORMAT_ERROR");
         }
-
         request = storeService.saveOpenCloseRequest(request);
 
+
+        OpenCloseResponse response;
         try {
             outputContent = new MtContent(outputFormat);
-            fillOutContent(outputContent, outputFormat, request, accountResult);
+            response = makeResponse(outputContent, outputFormat, request, accountResult);
         } catch (Exception e) {
             throw processError(e, "SVC_DATACOMPOSE_ERROR");
         }
+        response = storeService.saveOpenCloseResponse(response);
 
-
-        var successResult = OpenCloseResult.toProcessResult(results.get("SUCCESS"));
-        successResult.setData("l;kl;kl;kl;kl;\r\nkljkljkljlkjklhjkkljkl");
+        var successResult = ProcessResult.successResult();
+        successResult.setData(outputContent.getRawData());
 
         return successResult;
     }
@@ -163,7 +164,7 @@ public class OpenCloseProcessor implements DataProcessor {
         return ret;
     }
 
-    private Map<Integer, OpenCloseResult> makeRequestAccounts(OpenCloseRequest request, MtContent content) {
+    private Map<Integer, OpenCloseResult> makeRequestAccounts(OpenCloseRequest request, MtContent content, MtFormat format) {
         Map<Integer, OpenCloseResult> parseDataResult = new HashMap<>();
         try {
             var accountBlocks = content.getBlocks().stream()
@@ -177,13 +178,16 @@ public class OpenCloseProcessor implements DataProcessor {
                 request.getAccounts().add(account);
                 account.setRequest(request);
                 account.setSort(id);
-                account.setAccount((String) getBlockValue("account", content, emptyItems, id));
-                account.setOperType((Integer) getBlockValue("oper_type", content, emptyItems, id));
-                account.setBic((String) getBlockValue("bic", content, emptyItems, id));
-                account.setAccountType((String) getBlockValue("account_type", content, emptyItems, id));
-                account.setOperDate((LocalDateTime) getBlockValue("oper_date", content, emptyItems, id));
-                account.setRnn((String) getBlockValue("rnn", content, emptyItems, id));
-                account.setDog((String) getBlockValue("dog", content, emptyItems, id));
+                account.setAccount((String) getBlockValue("account", content, inputFormat, emptyItems, id));
+                account.setOperType(9);
+                account.setBic((String) getBlockValue("bic", content, inputFormat, emptyItems, id));
+                account.setAccountType((String) getBlockValue("account_type", content, inputFormat, emptyItems, id));
+                account.setOperDate((LocalDateTime) getBlockValue("oper_date", content, inputFormat, emptyItems, id));
+                account.setRnn((String) getBlockValue("rnn", content, inputFormat, emptyItems, id));
+                account.setDog((String) getBlockValue("dog", content, inputFormat, emptyItems, id));
+                account.setBicOld((String) getBlockValue("bic_old", content, inputFormat, emptyItems, id));
+                account.setAccountOld((String) getBlockValue("acc_old", content, inputFormat, emptyItems, id));
+                account.setDateModify((LocalDateTime) getBlockValue("acc_date_ch", content, inputFormat, emptyItems, id));
 
                 OpenCloseResult parseRowResult;
                 if (emptyItems.size() > 0) {
@@ -220,9 +224,15 @@ public class OpenCloseProcessor implements DataProcessor {
         }
     }
 
-    private Object getBlockValue(String itemName, MtContent content, Set<String> emptyItems, int id) {
+    private Object getBlockValue(String itemName,
+                                 MtContent content,
+                                 MtFormat format,
+                                 Set<String> emptyItems,
+                                 int id) {
         if (!content.checkOnEmpty(itemName, id)) {
-            emptyItems.add(itemName);
+            if (format.getItem("dog") != null){
+                emptyItems.add(itemName);
+            }
             return null;
         }
         try {
@@ -255,14 +265,19 @@ public class OpenCloseProcessor implements DataProcessor {
         return Arrays.asList(validTypes).contains(accType);
     }
 
-    private void fillOutContent(MtContent content,
-                                MtFormat format,
-                                OpenCloseRequest data,
-                                Map<Integer, OpenCloseResult> processResult) {
+    private OpenCloseResponse makeResponse(MtContent content,
+                                           MtFormat format,
+                                           OpenCloseRequest data,
+                                           Map<Integer, OpenCloseResult> processResult) {
+        OpenCloseResponse ret = new OpenCloseResponse(data);
+
         String[] constantNodeNames = new String[]{"HEAD", "ID", "MT_FORM", "SUBJECT"};
-        Arrays.stream(constantNodeNames).forEach(n -> {
-            var node = content.getNode(n, MtContent.FindNodeType.ByOrigCode);
-            var block = new MtBlock(0, "", node);
+        Arrays.stream(constantNodeNames).forEach(nodeName -> {
+            var node = content.getNode(nodeName, MtContent.FindNodeType.ByOrigCode);
+            var block = new MtBlock(
+                    0,
+                    getOutBlockFormatString(nodeName, format),
+                    node);
             node.getBlocks().add(block);
         });
         String respCodeForm = data.getCodeForm().equals("A01") ? "A1C" : "A3C";
@@ -271,8 +286,10 @@ public class OpenCloseProcessor implements DataProcessor {
         idBlock.setItem(format.getItem("reference"), data.getReference());
 
         var subjBlock = content.getNode("SUBJECT").getBlocks().get(0);
+        ret.setCodeForm(respCodeForm);
         subjBlock.setItem(format.getItem("code_form"), respCodeForm);
-        subjBlock.setItem(format.getItem("notify_date"), LocalDateTime.now());
+        ret.setNotifyDate(LocalDateTime.now());
+        subjBlock.setItem(format.getItem("notify_date"), ret.getNotifyDate());
         subjBlock.setItem(format.getItem("name_form"),
                 respCodeForm.equals("A1C")
                         ? "Подтв. о получ. увед. об откр. и закр. банк. счетов"
@@ -282,23 +299,47 @@ public class OpenCloseProcessor implements DataProcessor {
                 ? content.getNode("ACCOUNT")
                 : content.getNode("ACCOUNT_CHANGE");
         for (var account : data.getAccounts()) {
-            var accBlock = new MtBlock(account.getSort(), "", accNode);
+            var retAcc = new OpenCloseResponseAccount(ret, account);
+            var accBlock = new MtBlock(
+                    account.getSort(),
+                    getOutBlockFormatString(accNode.getCurrentCode(), format),
+                    accNode);
+            accBlock.setBlockFormat(getOutBlockFormat(accNode.getCurrentCode(), format));
+
             accNode.getBlocks().add(accBlock);
-            accBlock.setItem(format.getItem("bic"),account.getBic());
-            accBlock.setItem(format.getItem("account"),account.getAccount());
-            accBlock.setItem(format.getItem("account_type"),account.getAccountType());
-            accBlock.setItem(format.getItem("oper_type"),account.getOperType());
-            accBlock.setItem(format.getItem("oper_date"),account.getOperDate());
-            accBlock.setItem(format.getItem("rnn"),account.getRnn());
-            var res = processResult.get(account.getSort());
-            accBlock.setItem(format.getItem("result_code"),res.getCode());
-            accBlock.setItem(format.getItem("result_name"),res.getText());
-            accBlock.setItem(format.getItem("dog"),account.getDog());
-            accBlock.setItem(format.getItem("dog_date"),account.getDogDate());
+            accBlock.setItem(format.getItem("bic"), retAcc.getBic());
+            accBlock.setItem(format.getItem("account"), retAcc.getAccount());
+            accBlock.setItem(format.getItem("account_type"), retAcc.getAccountType());
+            accBlock.setItem(format.getItem("oper_type"), retAcc.getOperType());
+            accBlock.setItem(format.getItem("oper_date"), retAcc.getOperDate());
+            accBlock.setItem(format.getItem("rnn"), retAcc.getRnn());
+            accBlock.setItem(format.getItem("dog"), retAcc.getDog());
+            accBlock.setItem(format.getItem("dog_date"), retAcc.getDogDate());
+            accBlock.setItem(format.getItem("acc_old"), retAcc.getAccountOld());
+            accBlock.setItem(format.getItem("bic_old"), retAcc.getBicOld());
+            accBlock.setItem(format.getItem("acc_date_ch"), retAcc.getDateModify());
+            var res = processResult.get(retAcc.getSort());
+            retAcc.setResultCode(res.getCode());
+            accBlock.setItem(format.getItem("result_code"), retAcc.getResultCode());
+            retAcc.setResultMessage(res.getText());
+            accBlock.setItem(format.getItem("result_name"), retAcc.getResultMessage());
         }
+        content.getItems().putAll(format.getItems());
 
+        String contentText = MtComposer.Compose(content);
+        content.setRawData(contentText);
 
-        log.debug("start make data");
+        return ret;
     }
+
+    private String getOutBlockFormatString(String nodeName, MtFormat format) {
+        return format.getDetailFormats().get(nodeName).getSplitter() + "~"
+                + format.getDetailFormats().get(nodeName).getFormatString();
+    }
+
+    private MtBlockFormat getOutBlockFormat(String nodeName, MtFormat format) {
+        return format.getDetailFormats().get(nodeName);
+    }
+
 
 }

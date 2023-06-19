@@ -83,19 +83,13 @@ public class OpenCloseEndpoint {
         respInfo.setMessageId(messageId.toString());
         respInfo.setResponseDate(toXmlDate((now())));
         var status = new StatusInfo();
-        status.setCode("OK");
-        status.setMessage("Message processed successfully");
+        status.setCode(res.getStatusCode());
+        status.setMessage(res.getStatusMessage());
         respInfo.setStatus(status);
         resp.setResponseInfo(respInfo);
 
         var data = new ResponseData();
-        String mtData = "{4:\n" +
-                ":20:0818006500009D24\n" +
-                ":12:400\n" +
-                ":77E:FORMS\n" +
-                "/A1C/230317/Подтверждение об открытии и закрытии банковских счетов\n" +
-                "/ACCOUNT/KZKOKZKX/KZ224500284070011156/00/1/220615/881762767605/01/0000153/220101-}";
-        data.setData(mtData);
+        data.setData(res.getDataIgnoreCR());
         resp.setResponseData(data);
 
         ret.setResponse(resp);

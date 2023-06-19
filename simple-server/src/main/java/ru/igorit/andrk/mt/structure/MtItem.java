@@ -70,10 +70,15 @@ public class MtItem {
         }
         return value;
     }
+
     public String formatValue(Object value){
+        return this.formatValue(value, true);
+    }
+
+    public String formatValue(Object value, boolean checkRequired){
         String ret = "";
         if (value==null) {
-            if (this.isRequired()){
+            if (this.isRequired() && checkRequired){
                 throw new IllegalArgumentException("Пустое значение обязательного элемента "+this.code);
             }
             return "";

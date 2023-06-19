@@ -18,4 +18,11 @@ public class ProcessResult {
         this.statusCode = statusCode;
         this.statusMessage = statusMessage;
     }
+    public static ProcessResult successResult(){
+        return new ProcessResult("OK","Message processed successfully");
+    }
+
+    public String getDataIgnoreCR(){
+        return data.replace("\r","");
+    }
 }

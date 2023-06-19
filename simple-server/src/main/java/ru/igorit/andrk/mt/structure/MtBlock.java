@@ -19,10 +19,21 @@ public class MtBlock {
 
     private final Map<MtItem, String> values = new HashMap<>();
 
+    private MtBlockFormat blockFormat;
+
     public void setItem(MtItem item, Object value) {
-        String formattedVal = item.formatValue(value);
-        values.put(item, formattedVal);
+        if (item != null) {
+            String formattedVal = item.formatValue(value, blockFormat==null || blockFormat.containItem(item));
+            values.put(item, formattedVal);
+        }
     }
+
+    public MtItem getItem(String itemCode) {
+        return getValues().keySet().stream()
+                .filter(r -> itemCode.equals(r.getCode()))
+                .findFirst().orElse(null);
+    }
+
 
     @Override
     public String toString() {

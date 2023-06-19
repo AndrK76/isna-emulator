@@ -24,7 +24,7 @@ public class MtContent {
 
     @Getter
     @Setter
-    private final String rawData;
+    private String rawData;
 
     public MtContent(String rawData, MtFormat format) {
         this.rawData=rawData;

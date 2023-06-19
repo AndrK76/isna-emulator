@@ -19,7 +19,11 @@ create table open_close_request_accounts
     oper_date    TIMESTAMP,
     rnn          varchar(50),
     dog          varchar(50),
-    dog_date     TIMESTAMP
+    dog_date     TIMESTAMP,
+    bic_old      varchar(50),
+    account_old  varchar(50),
+    date_modify  TIMESTAMP
+
 );
 
 
