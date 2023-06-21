@@ -23,7 +23,6 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     @Column(name = "message_id")
     private UUID messageId;
 
@@ -34,6 +33,6 @@ public class Request {
     @Column(name = "message_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     private OffsetDateTime messageDate;
 
-    @Column(name = "data")
+    @Column(name = "data",length = 32000)
     private String data;
 }

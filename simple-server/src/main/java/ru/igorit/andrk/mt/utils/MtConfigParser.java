@@ -6,7 +6,7 @@ import org.springframework.data.util.Pair;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-import ru.igorit.andrk.config.ConfigFormatException;
+import ru.igorit.andrk.config.services.ConfigFormatException;
 import ru.igorit.andrk.mt.structure.*;
 
 import javax.xml.parsers.DocumentBuilder;

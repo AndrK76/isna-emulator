@@ -38,4 +38,13 @@ public class OpenCloseRequest {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "request", cascade = CascadeType.ALL)
     private List<OpenCloseRequestAccount> accounts = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "raw_request_id")
+    private Request rawRequest;
+
+    public OpenCloseRequest(Request request){
+        this();
+        this.rawRequest = request;
+    }
+
 }

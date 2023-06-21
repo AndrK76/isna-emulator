@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -23,6 +25,10 @@ public class OpenCloseResponse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    private OpenCloseRequest request;
+
     @NonNull
     @Column(name = "message_id")
     private UUID messageId;
@@ -39,10 +45,12 @@ public class OpenCloseResponse {
     private LocalDateTime notifyDate;
 
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "response", cascade = CascadeType.ALL)
+    @Fetch(FetchMode.SUBSELECT)
     private List<OpenCloseResponseAccount> accounts = new ArrayList<>();
 
     public OpenCloseResponse(OpenCloseRequest request){
         this();
+        this.request = request;
         this.messageId = request.getMessageId();
         this.reference = request.getReference();
     }

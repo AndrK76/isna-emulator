@@ -20,6 +20,10 @@ public class DataHandler {
         }
     }
 
+    public static XMLGregorianCalendar toXmlDate(OffsetDateTime date) {
+        return toXmlDate(date.toLocalDateTime());
+    }
+
     public static OffsetDateTime toTimeWithTZ(XMLGregorianCalendar xmlDate) {
         var gcDate = xmlDate.toGregorianCalendar();
         var zdt = gcDate.toZonedDateTime();

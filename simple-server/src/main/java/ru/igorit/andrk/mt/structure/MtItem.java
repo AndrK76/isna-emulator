@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.apache.commons.lang3.StringUtils;
-import ru.igorit.andrk.config.ConfigFormatException;
+import ru.igorit.andrk.config.services.ConfigFormatException;
 import ru.igorit.andrk.mt.utils.MtParser;
 
 import java.time.DateTimeException;

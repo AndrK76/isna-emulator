@@ -1,11 +1,14 @@
 server:
-  port: 8080
+  port: 8090
 
 spring:
   datasource:
-    url: jdbc:h2:file:./kgd
-    username: usr
-    password: pwd
+    main:
+      #url: jdbc:h2:mem:kgd
+      #url: jdbc:h2:file:./kgd
+      url: jdbc:postgresql://localhost:5430/demoDB
+      username: test
+      password: test
   jpa:
     open-in-view: false
     show-sql: false
@@ -13,13 +16,25 @@ spring:
     hibernate:
       ddl-auto: none
       #ddl-auto: validate
+      #ddl-auto: update
+      generate-ddl: false
+      #generate-ddl: true
   flyway:
-    enabled: true
+    enabled: false
+    main:
+      enabled: true
+      #locations: classpath:db/migration/main/h2
+      locations: classpath:db/migration/main/postgre
+      baseline-on-migrate: true
+
 
 logging:
   level:
     root: INFO
     ru.igorit.andrk: DEBUG
     #ru.igorit.andrk: TRACE
-    #org.hibernate.SQL: DEBUG
+    org.hibernate.SQL: DEBUG
     #org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor: debug
+    org.flywaydb: info
+    org.flywaydb.core.internal.license: fatal

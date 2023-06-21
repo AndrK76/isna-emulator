@@ -2,9 +2,9 @@ package ru.igorit.andrk.mt.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.igorit.andrk.config.ConfigFormatException;
+import ru.igorit.andrk.config.services.ConfigFormatException;
 import ru.igorit.andrk.mt.structure.*;
-import ru.igorit.andrk.service.processors.DataFormatFatalException;
+import ru.igorit.andrk.service.processor.DataFormatFatalException;
 
 import java.util.*;
 import java.util.stream.Collectors;
