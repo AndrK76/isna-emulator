@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.igorit.andrk.model.OpenCloseRequest;
@@ -15,6 +16,9 @@ import ru.igorit.andrk.repository.main.OpenCloseResponseRepository;
 import ru.igorit.andrk.repository.main.RequestRepository;
 import ru.igorit.andrk.repository.main.ResponseRepository;
 import ru.igorit.andrk.service.MainStoreService;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class MainStoreServiceJPAImpl implements MainStoreService {
@@ -57,6 +61,23 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     @Transactional
     public Response saveResponse(Response response) {
         return respRepo.save(response);
+    }
+
+    @Override
+    public Page<Response> getResponses(Long lastId, int count) {
+        Pageable condition = PageRequest.of(0, count, Sort.by("id").descending());
+        if (lastId == null) {
+            return respRepo.findAll(condition);
+        } else {
+            return respRepo.findAllByIdLessThan(lastId,condition);
+        }
+    }
+
+    @Override
+    public List<Response> getResponsesForRequests(List<Request> requests) {
+        var minRequest = requests.stream().min(Request::compareTo).orElse(null);
+        var maxRequest = requests.stream().max(Request::compareTo).orElse(null);
+        return respRepo.findAllByRequestBetween(minRequest,maxRequest);
     }
 
     @Override

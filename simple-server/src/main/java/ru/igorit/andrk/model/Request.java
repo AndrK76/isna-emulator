@@ -2,6 +2,7 @@ package ru.igorit.andrk.model;
 
 
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +18,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Entity(name = "requests")
-public class Request {
+@EqualsAndHashCode(of = "id")
+public class Request implements Comparable<Request>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,4 +37,9 @@ public class Request {
 
     @Column(name = "data",length = 32000)
     private String data;
+
+    @Override
+    public int compareTo(Request o) {
+        return this.getId().compareTo(o.getId());
+    }
 }

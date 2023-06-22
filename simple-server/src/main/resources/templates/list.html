@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head th:include="fragments/general.html :: header(title='Статистика ::'+ ${modeName})">
+    <title>Главная</title>
+</head>
+<body>
+
+<nav th:replace="fragments/general.html :: menu(page='list', mode=${mode})">
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col text-center">
+            <h2 th:text="'Статистика: '+${modeName}">Статистика</h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">col-sm-10</div>
+        <div class="col-sm-1"></div>
+    </div>
+</div>
+
+</body>
+</html>

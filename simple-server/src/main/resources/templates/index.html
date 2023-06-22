@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Ресурсы</title>
+<head th:include="fragments/general.html :: header(title='Главная')">
+    <title>Главная</title>
 </head>
 <body>
-<h2>Open/Close accounts</h2>
-<ul>
-    <li>WSDL: <a href="GovKgdService/openCloseAcc.wsdl" target="_blank">/GovKgdService/openCloseAcc.wsdl</a></li>
-    <li>Service: /GovKgdService/SendMessage</li>
-    <li>Requests:<a href="api/v1/request?after=&perPage=10" target="_blank">/api/v1/request</a></li>
-</ul>
+
+<nav th:replace="fragments/general.html :: menu(page='index', mode='')">
+</nav>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h2>Эмулятор</h2>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

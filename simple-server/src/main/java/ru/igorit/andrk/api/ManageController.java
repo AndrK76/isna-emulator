@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.igorit.andrk.config.Constants;
-import ru.igorit.andrk.dto.RequestDto;
+import ru.igorit.andrk.dto.RequestWithStateDto;
+import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.service.MainStoreService;
 
 @RestController
@@ -21,10 +22,14 @@ public class ManageController {
     }
 
     @GetMapping("/request")
-    public Page<RequestDto> getRequests(
+    public Page<RequestWithStateDto> getRequests(
             @RequestParam(required = false) Long after,
             @RequestParam(required = false, defaultValue = "10") int perPage) {
-        return mainStore.getRequests(after, perPage).map(RequestDto::toDto);
+        Page<Request> data = mainStore.getRequests(after, perPage);
+        Page<RequestWithStateDto> ret = data.map(RequestWithStateDto::create);
+        var responses= mainStore.getResponsesForRequests(data.getContent());
+        RequestWithStateDto.setResponseData(ret, responses);
+        return ret;
     }
 
 }

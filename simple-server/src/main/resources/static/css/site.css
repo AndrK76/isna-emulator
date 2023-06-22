@@ -1,0 +1,11 @@
+tr.col-header {
+    text-align: center;
+}
+
+a.selected-page {}
+a.noselected-page {}
+
+.error-item {
+    color: crimson;
+    background-color: yellow;
+}
