@@ -23,6 +23,7 @@ public class Response {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "request_id")
     @NonNull
+    @Setter
     private Request request;
 
     @NonNull

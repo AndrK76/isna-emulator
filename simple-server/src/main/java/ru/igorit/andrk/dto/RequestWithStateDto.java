@@ -25,24 +25,17 @@ public class RequestWithStateDto {
 
     private OffsetDateTime messageDate;
 
-    private String data;
-
     @Setter
     private ResponseForRequestDTO response;
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public RequestWithStateDto(UUID messageId, String serviceId, OffsetDateTime messageDate, String data) {
-        this(null, messageId, serviceId, messageDate, data, null);
+        this(null, messageId, serviceId, messageDate,  null);
     }
 
     public static RequestWithStateDto create(Request request) {
         return new RequestWithStateDto(request.getId(), request.getMessageId(), request.getServiceId(),
-                request.getMessageDate(), request.getData(), null);
-    }
-
-    public static Request fromDto(RequestWithStateDto request) {
-        return new Request(request.getId(), request.getMessageId(), request.getServiceId(),
-                request.getMessageDate(), request.getData());
+                request.getMessageDate().withNano(0),  null);
     }
 
     public static void setResponseData(Iterable<RequestWithStateDto> requests, List<Response> responses) {

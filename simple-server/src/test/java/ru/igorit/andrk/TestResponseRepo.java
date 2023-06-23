@@ -138,15 +138,26 @@ public class TestResponseRepo {
     @DisplayName("Find Responses by Request range")
     public void testFindResponsesByrequestRange() {
         int totalSize = 95;
+        int minBoundStep = 10, maxBoundStep = 80;
+        long minBound = 0L, maxBound = 0L;
         for (int i = 1; i <= totalSize; i++) {
+            long curReqId = 0;
             if (i % 2 == 0) {
-                svc.saveResponse(makeTestRequestWithResponse());
+                var res = svc.saveResponse(makeTestRequestWithResponse());
+                curReqId = res.getRequest().getId();
             } else {
-                svc.saveRequest(makeTestRequest());
+                var res = svc.saveRequest(makeTestRequest());
+                curReqId = res.getId();
+            }
+            if (i == minBoundStep){
+                minBound=curReqId;
+            }
+            if (i == maxBoundStep){
+                maxBound=curReqId;
             }
         }
-        var reqMin = reqRepo.findById(10L).get();
-        var reqMax = reqRepo.findById(80L).get();
+        var reqMin = reqRepo.findById(minBound).get();
+        var reqMax = reqRepo.findById(maxBound).get();
         var ret = respRepo.findAllByRequestBetween(reqMin, reqMax)
                 .stream().map(Response::getRequest).collect(Collectors.toList());
         var min = ret.stream().min(Request::compareTo).get().getId();

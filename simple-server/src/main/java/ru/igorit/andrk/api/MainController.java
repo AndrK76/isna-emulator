@@ -7,6 +7,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import ru.igorit.andrk.config.Constants;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -48,6 +49,8 @@ public class MainController implements ErrorController {
             Model model){
         model.addAttribute("mode", mode);
         model.addAttribute("modeName",listModes.getOrDefault(mode,"Не определено"));
+        model.addAttribute("restApiVersion", Constants.API_VERSION);
+        model.addAttribute("perPage",Constants.DEFAULT_PER_PAGE);
         return "list";
     }
 

@@ -52,14 +52,38 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
         if (lastId == null) {
             ret = reqRepo.findAll(condition);
         } else {
-            ret = reqRepo.findAllByIdLessThan(lastId,condition);
+            ret = reqRepo.findAllByIdLessThan(lastId, condition);
         }
         return ret;
     }
 
     @Override
+    public Long getIdForNewestRequestWithOffset(Long currRequestId, int offset) {
+        Pageable condition = PageRequest.of(0, offset, Sort.by("id"));
+        Page<Request> data = reqRepo.findAllByIdGreaterThan(currRequestId, condition);
+        if (data.getTotalElements() < offset) {
+            return null;
+        } else {
+            return data.getContent().get(offset - 1).getId();
+        }
+    }
+
+    @Override
+    public Request getRequestById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return reqRepo.findById(id).orElse(null);
+    }
+
+    @Override
     @Transactional
     public Response saveResponse(Response response) {
+        Request request = response.getRequest();
+        if (request.getId() != null) {
+            request = reqRepo.getReferenceById(request.getId());
+            response.setRequest(request);
+        }
         return respRepo.save(response);
     }
 
@@ -69,7 +93,7 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
         if (lastId == null) {
             return respRepo.findAll(condition);
         } else {
-            return respRepo.findAllByIdLessThan(lastId,condition);
+            return respRepo.findAllByIdLessThan(lastId, condition);
         }
     }
 
@@ -77,7 +101,18 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     public List<Response> getResponsesForRequests(List<Request> requests) {
         var minRequest = requests.stream().min(Request::compareTo).orElse(null);
         var maxRequest = requests.stream().max(Request::compareTo).orElse(null);
-        return respRepo.findAllByRequestBetween(minRequest,maxRequest);
+        if (minRequest == null || maxRequest == null) {
+            return new ArrayList<>();
+        }
+        return respRepo.findAllByRequestBetween(minRequest, maxRequest);
+    }
+
+    @Override
+    public Response getResponse(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return respRepo.findById(id).orElse(null);
     }
 
     @Override

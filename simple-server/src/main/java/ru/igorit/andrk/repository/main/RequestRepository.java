@@ -7,5 +7,9 @@ import ru.igorit.andrk.model.Request;
 
 public interface RequestRepository extends JpaRepository<Request, Long> {
     Page<Request> findAllByIdLessThan(Long id, Pageable pageable);
+    Page<Request> findAllByIdGreaterThan(Long id, Pageable pageable);
+
+
+
 
 }
