@@ -4,7 +4,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.igorit.andrk.model.OpenCloseRequest;
@@ -45,9 +44,10 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
         return reqRepo.save(request);
     }
 
+
     @Override
     public Page<Request> getRequests(Long lastId, int count) {
-        Pageable condition = PageRequest.of(0, count, Sort.by("id").descending());
+        Pageable condition = makePageCondition(count, true);
         Page<Request> ret;
         if (lastId == null) {
             ret = reqRepo.findAll(condition);
@@ -59,7 +59,7 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
 
     @Override
     public Long getIdForNewestRequestWithOffset(Long currRequestId, int offset) {
-        Pageable condition = PageRequest.of(0, offset, Sort.by("id"));
+        Pageable condition = makePageCondition(offset, false);
         Page<Request> data = reqRepo.findAllByIdGreaterThan(currRequestId, condition);
         if (data.getTotalElements() < offset) {
             return null;
@@ -89,7 +89,7 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
 
     @Override
     public Page<Response> getResponses(Long lastId, int count) {
-        Pageable condition = PageRequest.of(0, count, Sort.by("id").descending());
+        Pageable condition = makePageCondition(count, true);
         if (lastId == null) {
             return respRepo.findAll(condition);
         } else {
@@ -122,9 +122,96 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     }
 
     @Override
+    public Page<OpenCloseRequest> getOpenCloseRequests(Long lastId, int count) {
+        Pageable condition = makePageCondition(count, true);
+        if (lastId == null) {
+            return ocReqRepo.findAll(condition);
+        } else {
+            return ocReqRepo.findAllByIdLessThan(lastId, condition);
+        }
+    }
+
+    @Override
+    public Long getIdForNewestOpenCloseRequestWithOffset(Long currRequestId, int offset) {
+        Pageable condition = makePageCondition(offset, false);
+        Page<OpenCloseRequest> data = ocReqRepo.findAllByIdGreaterThan(currRequestId, condition);
+        if (data.getTotalElements() < offset) {
+            return null;
+        } else {
+            return data.getContent().get(offset - 1).getId();
+        }
+    }
+
+    @Override
+    @Transactional
+    public OpenCloseRequest getOpenCloseRequestById(Long id, boolean loadAccounts) {
+        if (id == null) {
+            return null;
+        }
+        var ret = ocReqRepo.findById(id).orElse(null);
+        if (loadAccounts) {
+            var cou = ret.getAccounts().size();
+        }
+        return ret;
+    }
+
+    @Override
+    @Transactional
+    public OpenCloseRequest getOpenCloseRequestById(Long id) {
+        return getOpenCloseRequestById(id, false);
+    }
+
+    @Override
     @Transactional
     public OpenCloseResponse saveOpenCloseResponse(OpenCloseResponse response) {
         return ocRespRepo.save(response);
+    }
+
+    @Override
+    @Transactional
+    public OpenCloseResponse getOpenCloseResponseById(Long id, boolean loadAccounts) {
+        if (id == null) {
+            return null;
+        }
+        var ret = ocRespRepo.findById(id).orElse(null);
+        if (loadAccounts) {
+            var cou = ret.getAccounts().size();
+        }
+        return ret;
+    }
+    @Override
+    @Transactional
+    public OpenCloseResponse getOpenCloseResponseById(Long id) {
+        return getOpenCloseResponseById(id, false);
+    }
+
+    @Override
+    public Page<OpenCloseResponse> getOpenCloseResponses(Long lastId, int count) {
+        Pageable condition = makePageCondition(count, true);
+        if (lastId == null) {
+            return ocRespRepo.findAll(condition);
+        } else {
+            return ocRespRepo.findAllByIdLessThan(lastId, condition);
+        }
+
+    }
+
+    @Override
+    public List<OpenCloseResponse> getOpenCloseResponsesForRequests(List<OpenCloseRequest> requests) {
+        var minRequest = requests.stream().min(OpenCloseRequest::compareTo).orElse(null);
+        var maxRequest = requests.stream().max(OpenCloseRequest::compareTo).orElse(null);
+        if (minRequest == null || maxRequest == null) {
+            return new ArrayList<>();
+        }
+        return ocRespRepo.findAllByRequestBetween(minRequest, maxRequest);
+    }
+
+    private Pageable makePageCondition(int count, boolean descending) {
+        if (descending) {
+            return PageRequest.of(0, count, Sort.by("id").descending());
+        } else {
+            return PageRequest.of(0, count, Sort.by("id"));
+        }
     }
 
 }

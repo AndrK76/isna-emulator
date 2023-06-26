@@ -21,7 +21,7 @@ import javax.xml.namespace.QName;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
-import static ru.igorit.andrk.config.Constants.DEFAULT_NAMESPACE;
+import static ru.igorit.andrk.config.services.Constants.DEFAULT_NAMESPACE;
 import static ru.igorit.andrk.utils.DataHandler.toXmlDate;
 
 @Endpoint

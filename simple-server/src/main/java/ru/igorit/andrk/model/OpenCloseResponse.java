@@ -25,7 +25,7 @@ public class OpenCloseResponse {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private OpenCloseRequest request;
 
@@ -44,8 +44,8 @@ public class OpenCloseResponse {
     @Column(name = "notify_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime notifyDate;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "response", cascade = CascadeType.ALL)
-    @Fetch(FetchMode.SUBSELECT)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "response", cascade = CascadeType.ALL)
+    //@Fetch(FetchMode.SUBSELECT)
     private List<OpenCloseResponseAccount> accounts = new ArrayList<>();
 
     public OpenCloseResponse(OpenCloseRequest request){

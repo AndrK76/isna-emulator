@@ -15,7 +15,7 @@ import java.util.*;
 @Getter
 @Setter
 @Entity(name = "open_close_requests")
-public class OpenCloseRequest {
+public class OpenCloseRequest implements Comparable<OpenCloseRequest> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -35,16 +35,19 @@ public class OpenCloseRequest {
     @Column(name = "notify_date", columnDefinition = "TIMESTAMP")
     private LocalDateTime notifyDate;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "request", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "request", cascade = CascadeType.ALL)
     private List<OpenCloseRequestAccount> accounts = new ArrayList<>();
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinColumn(name = "raw_request_id")
     private Request rawRequest;
 
-    public OpenCloseRequest(Request request){
+    public OpenCloseRequest(Request request) {
         this();
         this.rawRequest = request;
     }
-
+    @Override
+    public int compareTo(OpenCloseRequest o) {
+        return this.getId().compareTo(o.getId());
+    }
 }

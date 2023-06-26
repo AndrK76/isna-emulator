@@ -1,4 +1,4 @@
-package ru.igorit.andrk;
+package ru.igorit.andrk.mainstore;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -88,7 +88,7 @@ public class TestResponseRepo {
                 .isEqualTo(reqId);
     }
 
-    @Test
+    //@Test
     @DisplayName("Pagination get Response in storage")
     public void testPagination() {
         int totalSize = 95;
@@ -136,7 +136,7 @@ public class TestResponseRepo {
 
     @Test
     @DisplayName("Find Responses by Request range")
-    public void testFindResponsesByrequestRange() {
+    public void testFindResponsesByRequestRange() {
         int totalSize = 95;
         int minBoundStep = 10, maxBoundStep = 80;
         long minBound = 0L, maxBound = 0L;

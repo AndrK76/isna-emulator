@@ -18,15 +18,24 @@ public class ResponseForRequestDTO {
     private OffsetDateTime responseDate;
     private String statusCode;
     private String statusMessage;
+    private String data;
 
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public ResponseForRequestDTO(UUID messageId, String serviceId, Boolean isSuccess, OffsetDateTime responseDate, String statusCode, String statusMessage) {
-        this(null, messageId, serviceId, isSuccess, responseDate, statusCode, statusMessage);
+    public static ResponseForRequestDTO create(Response response, boolean addData) {
+        return new ResponseForRequestDTO(
+                response.getId(),
+                response.getMessageId(),
+                response.getServiceId(),
+                response.getIsSuccess(),
+                response.getResponseDate().withNano(0),
+                response.getStatusCode(),
+                response.getStatusMessage(),
+                addData ? response.getData() : null);
     }
 
     public static ResponseForRequestDTO create(Response response) {
-        return new ResponseForRequestDTO(response.getId(), response.getMessageId(), response.getServiceId(), response.getIsSuccess(),
-                response.getResponseDate().withNano(0), response.getStatusCode(), response.getStatusMessage());
+        return create(response, false);
     }
+
 
 }

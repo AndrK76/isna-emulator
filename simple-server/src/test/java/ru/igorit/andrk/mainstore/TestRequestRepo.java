@@ -1,9 +1,10 @@
-package ru.igorit.andrk;
+package ru.igorit.andrk.mainstore;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
@@ -14,6 +15,8 @@ import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
 import javax.sql.DataSource;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -72,7 +75,7 @@ public class TestRequestRepo {
         }
         couInRepo = repo.findAll().size();
         assertThat(couInRepo)
-                .withFailMessage("Request table contain %d records, but must contain %d before test",couInRepo,totalSize)
+                .withFailMessage("Request table contain %d records, but must contain %d before test", couInRepo, totalSize)
                 .isEqualTo(totalSize);
         Long pos = null;
         Long prevPos = null;
@@ -81,17 +84,17 @@ public class TestRequestRepo {
             var page = svc.getRequests(pos, partitionSize);
             pos = page.stream().min((o1, o2) -> o1.getId().compareTo(o2.getId())).get().getId();
             var actualPartitionSize = page.getContent().size();
-            if (i==0){
+            if (i == 0) {
                 var actualTotal = page.getTotalElements();
                 assertThat(actualTotal).withFailMessage("Total must be equal" + totalSize)
                         .isEqualTo(totalSize);
             }
-            if (i < Math.ceil((double)totalSize / partitionSize) -1){
+            if (i < Math.ceil((double) totalSize / partitionSize) - 1) {
                 assertThat(actualPartitionSize)
                         .withFailMessage("Each partition size except last must be equal" + partitionSize)
                         .isEqualTo(partitionSize);
                 prevPos = pos;
-            } else{
+            } else {
                 lastPartitionSize = actualPartitionSize;
             }
         }
@@ -100,8 +103,33 @@ public class TestRequestRepo {
         var actualPartitionSize = page.getContent().size();
         assertThat(actualPartitionSize)
                 .withFailMessage("Size last partition (%d) after insert must be don't change (%s)"
-                        ,actualPartitionSize, lastPartitionSize)
+                        , actualPartitionSize, lastPartitionSize)
                 .isEqualTo(lastPartitionSize);
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {0, 1, 8, 10, 19, 20})
+    @DisplayName("Validate value with offset ")
+    public void testGetIdForNewestRequestWithOffset() {
+        int sampleSize = 20;
+        int offset = 1;
+        Map<Integer, Long> idValues = new HashMap<>();
+        for (int i = 0; i < sampleSize; i++) {
+            idValues.put(i, svc.saveRequest(makeTestRequest()).getId());
+        }
+        for (int i = 0; i < sampleSize; i++) {
+            var dlt = sampleSize - offset;
+            var val = svc.getIdForNewestRequestWithOffset(idValues.get(i), offset);
+            if (i < sampleSize - offset) {
+                assertThat(val)
+                        .withFailMessage("Offset on %d value on step %d of %d must by not null, but is null", offset, i + 1, sampleSize)
+                        .isNotNull();
+            } else {
+                assertThat(val)
+                        .withFailMessage("Offset on %d value on step %d of %d must by null, but is %d", offset, i + 1, sampleSize, val)
+                        .isNull();
+            }
+        }
     }
 
 }

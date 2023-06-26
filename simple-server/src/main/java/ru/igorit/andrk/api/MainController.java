@@ -1,5 +1,6 @@
 package ru.igorit.andrk.api;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -7,7 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import ru.igorit.andrk.config.Constants;
+import ru.igorit.andrk.config.services.Constants;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -17,16 +18,21 @@ import java.util.Map;
 @Controller
 public class MainController implements ErrorController {
 
-    private static Map<String,String> listModes = new HashMap<>();
+    private static Map<String, String> listModes = new HashMap<>();
 
     static {
-        listModes.put("general","Все запросы");
-        listModes.put("open-close","Уведомления об открытии, закрытии и изменении счетов");
+        listModes.put("general", "Все запросы");
+        listModes.put("open-close", "Уведомления об открытии, закрытии и изменении счетов");
     }
 
+    private final int docPerPage;
 
-    @GetMapping({"/","/index"})
-    public String index(){
+    public MainController(@Value("${api.doc_per_page}") int docPerPage) {
+        this.docPerPage = docPerPage;
+    }
+
+    @GetMapping({"/", "/index"})
+    public String index() {
         return "index";
     }
 
@@ -37,7 +43,6 @@ public class MainController implements ErrorController {
         HttpStatus statusCode = HttpStatus.resolve(Integer.parseInt(status.toString()));
 
 
-
         model.addAttribute("code", status.toString());
         model.addAttribute("name", statusCode.getReasonPhrase());
         return "error";
@@ -46,11 +51,11 @@ public class MainController implements ErrorController {
     @RequestMapping("/list")
     public String showstatistics(
             @RequestParam(name = "mode", required = false, defaultValue = "general") String mode,
-            Model model){
+            Model model) {
         model.addAttribute("mode", mode);
-        model.addAttribute("modeName",listModes.getOrDefault(mode,"Не определено"));
+        model.addAttribute("modeName", listModes.getOrDefault(mode, "Не определено"));
         model.addAttribute("restApiVersion", Constants.API_VERSION);
-        model.addAttribute("perPage",Constants.DEFAULT_PER_PAGE);
+        model.addAttribute("perPage", docPerPage);
         return "list";
     }
 

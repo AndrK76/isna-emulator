@@ -34,16 +34,6 @@ function showHideResponse(requestId, responseId, onlyHide) {
     }
 }
 
-let startIdx = '';
-let prevIdx = '';
-
-$(function () {
-    $('#perPage').val(perPage);
-    getData(startIdx);
-});
-
-$.ajaxSetup({contentType: "application/json; charset=utf-8"});
-
 function getData(fromIdx) {
     $.getJSON(apiUrl + '/request?perPage=' + perPage + '&after=' + fromIdx, function (data) {
         $('#listTable  > tbody').empty();
@@ -80,32 +70,7 @@ function getData(fromIdx) {
     });
 }
 
-function enableButton(button, enable) {
-    button.attr('disabled', !enable);
-    if (enable) {
-        button.removeClass('btn-light');
-        button.addClass('btn-dark');
-    } else {
-        button.removeClass('btn-dark');
-        button.addClass('btn-light');
-    }
-}
-
 function addRowBelow(prefix, title, id, data) {
-    let content = '<tr id="' + prefix + +id + '"><td colspan = "5">' + title + ':<pre>' + data + '</pre></td></tr>';
+    let content = '<tr id="' + prefix + id + '"><td colspan = "5">' + title + ':<pre>' + data + '</pre></td></tr>';
     $('#row_' + id).after(content);
 }
-
-$('#btPerPage').click(function () {
-    startIdx = '';
-    perPage = $('#perPage').val();
-    getData(startIdx);
-});
-
-$('#btPrev').click(function () {
-    getData(startIdx);
-});
-
-$('#btNext').click(function () {
-    getData(prevIdx);
-});

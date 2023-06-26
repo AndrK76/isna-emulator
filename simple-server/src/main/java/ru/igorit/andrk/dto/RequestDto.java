@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.domain.Page;
 import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.model.Response;
 
@@ -16,7 +15,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Getter
-public class RequestWithStateDto {
+public class RequestDto {
     private Long id;
 
     private UUID messageId;
@@ -28,17 +27,19 @@ public class RequestWithStateDto {
     @Setter
     private ResponseForRequestDTO response;
 
+    private String data;
+
     @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
-    public RequestWithStateDto(UUID messageId, String serviceId, OffsetDateTime messageDate, String data) {
-        this(null, messageId, serviceId, messageDate,  null);
+    public static RequestDto create(Request request, boolean addData) {
+        return new RequestDto(request.getId(), request.getMessageId(), request.getServiceId(),
+                request.getMessageDate().withNano(0),  null, addData? request.getData() : null);
     }
 
-    public static RequestWithStateDto create(Request request) {
-        return new RequestWithStateDto(request.getId(), request.getMessageId(), request.getServiceId(),
-                request.getMessageDate().withNano(0),  null);
+    public static RequestDto create(Request request) {
+       return create(request, false);
     }
 
-    public static void setResponseData(Iterable<RequestWithStateDto> requests, List<Response> responses) {
+    public static void setResponseData(Iterable<RequestDto> requests, List<Response> responses) {
         Map<Long, Response> responseMap = responses.stream()
                 .collect(Collectors.toMap(k -> k.getRequest().getId(), v -> v));
         requests.forEach(r -> {

@@ -29,6 +29,8 @@ spring:
       locations: classpath:db/migration/main/postgre
       baseline-on-migrate: true
 
+api:
+  doc_per_page: 10
 
 logging:
   level:
