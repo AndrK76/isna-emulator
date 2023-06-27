@@ -48,6 +48,10 @@
                     <a th:if="${mode} == 'open-close'" class="btn btn-sm btn-dark selected-page" href="/list?mode=open-close">Открытие/закрытие</a>
                     <a th:unless="${mode} == 'open-close'" class="btn btn-sm btn-light noselected-page" href="list?mode=open-close">Открытие/закрытие</a>
                 </li>
+                <li class="nav-item" th:if="${page} == 'manage'">
+                    <a th:if="${mode} == 'open-close'" class="btn btn-sm btn-dark selected-page" href="/manage?mode=open-close">Открытие/закрытие</a>
+                    <a th:unless="${mode} == 'open-close'" class="btn btn-sm btn-light noselected-page" href="list?mode=open-close">Открытие/закрытие</a>
+                </li>
             </ul>
         </div>
     </div>

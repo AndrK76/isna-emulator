@@ -35,7 +35,9 @@ public class TestRequestRepo {
 
     @BeforeEach
     private void initService() {
-        svc = new MainStoreServiceJPAImpl(repo, null, null, null);
+        svc = MainStoreServiceJPAImpl.builder()
+                .reqRepo(repo)
+                .build();
     }
 
     private Request makeTestRequest() {

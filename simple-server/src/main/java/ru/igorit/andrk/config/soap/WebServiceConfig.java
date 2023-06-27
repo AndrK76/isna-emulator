@@ -14,6 +14,7 @@ import org.springframework.ws.transport.http.MessageDispatcherServlet;
 import org.springframework.ws.wsdl.wsdl11.DefaultWsdl11Definition;
 import org.springframework.xml.xsd.SimpleXsdSchema;
 import org.springframework.xml.xsd.XsdSchema;
+import ru.igorit.andrk.config.services.Constants;
 import ru.igorit.andrk.config.services.ServiceFaultException;
 
 import javax.xml.bind.JAXBException;
@@ -31,8 +32,8 @@ public class WebServiceConfig extends WsConfigurerAdapter {
         servlet.setTransformWsdlLocations(true);
 
         return new ServletRegistrationBean<>(servlet,
-                "/GovKgdService/SendMessage",
-                "/GovKgdService/openCloseAcc.wsdl");
+                "/" + Constants.SERVICE_PATH + "/" + Constants.SEND_MESSAGE,
+                "/" + Constants.SERVICE_PATH + "/" + Constants.OPEN_CLOSE_WSDL);
     }
 
     @Bean(name="openCloseSchema")
@@ -45,8 +46,8 @@ public class WebServiceConfig extends WsConfigurerAdapter {
             @Qualifier("openCloseSchema") XsdSchema openCloseSchema) {
         var wsdl11Definition = new DefaultWsdl11Definition();
         wsdl11Definition.setPortTypeName("OpenClosePort");
-        wsdl11Definition.setLocationUri("/GovKgdService");
-        wsdl11Definition.setTargetNamespace("http://kgd.integration.gov.icode.kz/");
+        wsdl11Definition.setLocationUri("/" + Constants.SERVICE_PATH);
+        wsdl11Definition.setTargetNamespace(Constants.DEFAULT_NAMESPACE);
         wsdl11Definition.setSchema(openCloseSchema);
         return wsdl11Definition;
     }

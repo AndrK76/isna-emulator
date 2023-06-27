@@ -42,7 +42,10 @@ public class TestOpenCloseRequestRepo {
 
     @BeforeEach
     private void initService() {
-        svc = new MainStoreServiceJPAImpl(mainReqRepo, null, ocReqRepo, null);
+        svc = MainStoreServiceJPAImpl.builder()
+                .reqRepo(mainReqRepo)
+                .ocReqRepo(ocReqRepo)
+                .build();
     }
 
     @Test

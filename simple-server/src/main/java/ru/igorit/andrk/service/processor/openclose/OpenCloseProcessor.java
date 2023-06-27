@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import ru.igorit.andrk.config.services.ConfigFormatException;
+import ru.igorit.andrk.config.services.Constants;
 import ru.igorit.andrk.model.*;
 import ru.igorit.andrk.mt.structure.*;
 import ru.igorit.andrk.mt.utils.MtComposer;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 @Service
 public class OpenCloseProcessor implements DataProcessor {
     private static final Logger log = LoggerFactory.getLogger(OpenCloseProcessor.class);
-    private static final String DOCUMENT = "ISNA_BVU_BA_OPEN_CLOSE";
+    private static final String DOCUMENT = Constants.OPEN_CLOSE_SERVICE;
     private final MtFormat inputFormat = new MtFormat();
     private final MtFormat outputFormat = new MtFormat();
     private final MainStoreService mainStoreService;
@@ -40,6 +41,8 @@ public class OpenCloseProcessor implements DataProcessor {
 
     @Override
     public ProcessResult process(Request request, UUID messageId) {
+        OpenCloseDynamicSettings dynSettings = OpenCloseDynamicSettings.create(mainStoreService.getSettingsByGroup(this.document()));
+
         String data = request.getData();
         MtContent inputContent, outputContent;
         if (inputFormat.getNodes().size() == 0) {

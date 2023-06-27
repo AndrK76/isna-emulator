@@ -1,16 +1,17 @@
 package ru.igorit.andrk.api;
 
+import org.apache.catalina.Store;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.igorit.andrk.config.services.Constants;
 import ru.igorit.andrk.dto.*;
-import ru.igorit.andrk.model.OpenCloseRequest;
-import ru.igorit.andrk.model.OpenCloseRequestAccount;
-import ru.igorit.andrk.model.OpenCloseResponse;
-import ru.igorit.andrk.model.Request;
+import ru.igorit.andrk.model.*;
 import ru.igorit.andrk.service.MainStoreService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -113,6 +114,41 @@ public class ManageController {
         OpenCloseResponse response = mainStore.getOpenCloseResponseById(id, true);
         OpenCloseResponseForRequestDTO ret = OpenCloseResponseForRequestDTO.create(response, true);
         return ret;
+    }
+
+    @GetMapping("/settings/{service}")
+    public List<StoredSettingDTO> getSettingsForService(
+            @PathVariable(name = "service") String serviceName) {
+        List<StoredSetting> data = mainStore.getSettingsByGroup(serviceName);
+        /*
+        StoredSettingKey key = new StoredSettingKey(serviceName,"CheckUniqueMessageId");
+        StoredSetting set = new StoredSetting(key, false);
+        data.add(mainStore.saveSetting(set));
+        key = new StoredSettingKey(serviceName,"CheckUniqueResponseId");
+        set = new StoredSetting(key, false);
+        data.add(mainStore.saveSetting(set));
+        key = new StoredSettingKey(serviceName,"ValidateAccountState");
+        set = new StoredSetting(key, false);
+        data.add(mainStore.saveSetting(set));
+
+        key = new StoredSettingKey(serviceName,"TestString");
+        set = new StoredSetting(key, "Строка 1");
+        data.add(mainStore.saveSetting(set));
+        key = new StoredSettingKey(serviceName,"TestLong");
+        set = new StoredSetting(key, Long.valueOf(10L));
+        data.add(mainStore.saveSetting(set));
+        key = new StoredSettingKey(serviceName,"TestDouble");
+        set = new StoredSetting(key, Double.valueOf(15.2));
+        data.add(mainStore.saveSetting(set));
+        key = new StoredSettingKey(serviceName,"TestLocalDateTime");
+        set = new StoredSetting(key, LocalDateTime.now().withNano(0));
+        data.add(mainStore.saveSetting(set));
+        key = new StoredSettingKey(serviceName,"TestLocalDate");
+        set = new StoredSetting(key, LocalDate.now());
+        data.add(mainStore.saveSetting(set));
+*/
+
+        return StoredSettingDTO.create(data);
     }
 
 }

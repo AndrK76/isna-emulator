@@ -1,10 +1,7 @@
 package ru.igorit.andrk.service;
 
 import org.springframework.data.domain.Page;
-import ru.igorit.andrk.model.OpenCloseRequest;
-import ru.igorit.andrk.model.OpenCloseResponse;
-import ru.igorit.andrk.model.Request;
-import ru.igorit.andrk.model.Response;
+import ru.igorit.andrk.model.*;
 
 import java.util.List;
 
@@ -46,5 +43,10 @@ public interface MainStoreService {
 
     List<OpenCloseResponse> getOpenCloseResponsesForRequests(List<OpenCloseRequest> requests);
 
+    List<StoredSetting> getSettingsByGroup(String groupName);
+
+    StoredSetting saveSetting(StoredSetting setting);
+
+    StoredSetting getSetting(StoredSettingKey key);
 
 }
