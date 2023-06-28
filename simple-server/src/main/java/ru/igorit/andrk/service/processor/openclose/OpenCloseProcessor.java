@@ -67,7 +67,7 @@ public class OpenCloseProcessor implements DataProcessor {
         Map<Integer, OpenCloseResult> accountResult;
         try {
             ocRequest = makeRequestEntity(request, inputContent, messageId);
-            accountResult = makeRequestAccounts(ocRequest, inputContent, inputFormat);
+            accountResult = makeRequestAccounts(ocRequest, inputContent, dynSettings);
         } catch (Exception e) {
             throw processError(e, "SVC_DATAFORMAT_ERROR");
         }
@@ -81,7 +81,7 @@ public class OpenCloseProcessor implements DataProcessor {
         } catch (Exception e) {
             throw processError(e, "SVC_DATACOMPOSE_ERROR");
         }
-        ocResponse = mainStoreService.saveOpenCloseResponse(ocResponse);
+        mainStoreService.saveOpenCloseResponse(ocResponse);
 
         var successResult = ProcessResult.successResult();
         successResult.setData(outputContent.getRawData());
@@ -125,7 +125,7 @@ public class OpenCloseProcessor implements DataProcessor {
                         }
                         Optional<Node> valNode = valueNodes.stream()
                                 .filter(r -> r.getNodeType() == Node.CDATA_SECTION_NODE).findFirst();
-                        if (!valNode.isPresent()) {
+                        if (valNode.isEmpty()) {
                             valNode = Optional.of(valueNodes.get(0));
                         }
                         res.setText(valNode.get().getNodeValue());
@@ -147,12 +147,12 @@ public class OpenCloseProcessor implements DataProcessor {
     private void validateContentOnFatalErrors(MtContent content) {
         String[] requiredItems = new String[]{"reference", "code_form", "notify_date"};
         if (!Arrays.stream(requiredItems).map(content::getValue).allMatch(Objects::nonNull)) {
-            String reqToStr = Arrays.stream(requiredItems).collect(Collectors.joining(", "));
+            String reqToStr = String.join(", ", requiredItems);
             throw new DataFormatFatalException("Не найдены поля определяющие формат: " + reqToStr);
         }
         String[] validCodeForms = new String[]{"A01", "A03"};
         var codeForm = (String) content.getValue("code_form");
-        if (!Arrays.stream(requiredItems).map(content::getValue).anyMatch(codeForm::equals)) {
+        if (Arrays.stream(validCodeForms).noneMatch(codeForm::equals)) {
             throw new DataFormatFatalException("Некорректная форма: " + codeForm);
         }
     }
@@ -166,7 +166,10 @@ public class OpenCloseProcessor implements DataProcessor {
         return ret;
     }
 
-    private Map<Integer, OpenCloseResult> makeRequestAccounts(OpenCloseRequest request, MtContent content, MtFormat format) {
+    private Map<Integer, OpenCloseResult> makeRequestAccounts(
+            OpenCloseRequest request,
+            MtContent content,
+            OpenCloseDynamicSettings dynSettings) {
         Map<Integer, OpenCloseResult> parseDataResult = new HashMap<>();
         try {
             var accountBlocks = content.getBlocks().stream()
@@ -196,11 +199,21 @@ public class OpenCloseProcessor implements DataProcessor {
                 account.setDateModify((LocalDateTime) getBlockValue("acc_date_ch", content, inputFormat, emptyItems, id));
 
                 OpenCloseResult parseRowResult;
-                if (emptyItems.size() > 0) {
+                if (dynSettings.isCheckUniqueMessageId() && mainStoreService.containRequestWithMessageId(request.getRawRequest())) {
+                    parseRowResult = new OpenCloseResult(results.get("DUPLICATE_MSGID"));
+                    parseRowResult.setText(
+                            parseRowResult.getText().replace("%%{MESSAGE_ID}%%",
+                                    request.getMessageId().toString()));
+                } else if (dynSettings.isCheckUniqueReference() && mainStoreService.containOpenCloseRequestWithReference(request)) {
+                    parseRowResult = new OpenCloseResult(results.get("DUPLICATE_REFERENCE"));
+                    parseRowResult.setText(
+                            parseRowResult.getText().replace("%%{REFERENCE}%%",
+                                    request.getReference()));
+                } else if (emptyItems.size() > 0) {
                     parseRowResult = new OpenCloseResult(results.get("EMPTY_FIELD"));
                     parseRowResult.setText(
                             parseRowResult.getText().replace("%%{FIELD}%%",
-                                    emptyItems.stream().collect(Collectors.joining(", "))));
+                                    String.join(", ", emptyItems)));
                 } else if (!checkTypeOper(account)) {
                     parseRowResult = new OpenCloseResult(results.get("INVALID_OPER_TYPE"));
                     parseRowResult.setText(
@@ -216,6 +229,16 @@ public class OpenCloseProcessor implements DataProcessor {
                                     account.getAccountType()));
                 } else {
                     parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
+                    if (dynSettings.isValidateAccountState() || dynSettings.isValidateOperationDate()){
+                        var lastOpen = mainStoreService.lastResponseForAccountByOperTypeAndResult(
+                                account.getAccount(),1,"01");
+                        var lastClose = mainStoreService.lastResponseForAccountByOperTypeAndResult(
+                                account.getAccount(),2, "01");
+                        var lastChange = mainStoreService.lastResponseForAccountByOperTypeAndResult(
+                                account.getAccount(),9, "01");
+                        System.out.println("rrr");
+
+                    }
                 }
                 parseDataResult.put(id, parseRowResult);
             }
@@ -230,6 +253,7 @@ public class OpenCloseProcessor implements DataProcessor {
         }
     }
 
+
     private Object getBlockValue(String itemName,
                                  MtContent content,
                                  MtFormat format,
@@ -242,8 +266,7 @@ public class OpenCloseProcessor implements DataProcessor {
             return null;
         }
         try {
-            var ret = content.getValue(itemName, id);
-            return ret;
+            return content.getValue(itemName, id);
         } catch (RuntimeException e) {
             if (content.getItems().get(itemName).isRequired()) {
                 emptyItems.add(itemName);
@@ -256,12 +279,8 @@ public class OpenCloseProcessor implements DataProcessor {
     private boolean checkTypeOper(OpenCloseRequestAccount accountInfo) {
         String codeForm = accountInfo.getRequest().getCodeForm();
         int operType = accountInfo.getOperType();
-        if (codeForm.equals("A01") && (operType == 1 || operType == 2)) {
-            return true;
-        } else if (codeForm.equals("A03") && operType == 9) {
-            return true;
-        }
-        return false;
+        return (codeForm.equals("A01") && (operType == 1 || operType == 2))
+                || (codeForm.equals("A03") && operType == 9);
     }
 
     //TODO: захардкожено, можно тоже в настройки вынести секцией
@@ -270,6 +289,8 @@ public class OpenCloseProcessor implements DataProcessor {
         var validTypes = new String[]{"00", "05", "09", "20"};
         return Arrays.asList(validTypes).contains(accType);
     }
+
+
 
     private OpenCloseResponse makeResponse(MtContent content,
                                            MtFormat format,

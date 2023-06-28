@@ -9,4 +9,6 @@ import ru.igorit.andrk.model.Request;
 public interface OpenCloseRequestRepository extends JpaRepository<OpenCloseRequest,Long> {
     Page<OpenCloseRequest> findAllByIdLessThan(Long id, Pageable pageable);
     Page<OpenCloseRequest> findAllByIdGreaterThan(Long id, Pageable pageable);
+    long countByReference(String reference);
+    long countByReferenceAndIdNot(String reference, Long id);
 }

@@ -1,26 +1,29 @@
 package ru.igorit.andrk.api;
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import ru.igorit.andrk.config.services.Constants;
+import ru.igorit.andrk.service.processor.ProcessorFactory;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
-import java.net.InetAddress;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import static ru.igorit.andrk.config.services.Constants.*;
 
@@ -40,11 +43,12 @@ public class MainController implements ErrorController {
     }
 
     private final int docPerPage;
-
+    private final ProcessorFactory processorFactory;
 
     public MainController(
-            @Value("${api.doc_per_page}") int docPerPage) {
+            @Value("${api.doc_per_page}") int docPerPage, ProcessorFactory processorFactory) {
         this.docPerPage = docPerPage;
+        this.processorFactory = processorFactory;
     }
 
     @GetMapping({"/", "/index"})
@@ -73,7 +77,16 @@ public class MainController implements ErrorController {
         return "error";
     }
 
-    @RequestMapping("/list")
+    @RequestMapping("/error404")
+    public String handleError(Model model) {
+
+        HttpStatus statusCode = HttpStatus.resolve(404);
+        model.addAttribute("code", "404");
+        model.addAttribute("name", statusCode.getReasonPhrase());
+        return "error";
+    }
+
+    @GetMapping("/list")
     public String showStatistics(
             @RequestParam(name = "mode", required = false, defaultValue = "general") String mode,
             Model model) {
@@ -84,7 +97,7 @@ public class MainController implements ErrorController {
         return "list";
     }
 
-    @RequestMapping("/manage")
+    @GetMapping("/manage")
     public String manage(
             @RequestParam(name = "mode", required = false, defaultValue = "open-close") String mode,
             Model model) {
@@ -95,4 +108,21 @@ public class MainController implements ErrorController {
         return "manage";
     }
 
+    @GetMapping("/config/{config}")
+    public void downloadConfig(
+            @PathVariable(name = "config") String configName,
+            HttpServletResponse response) throws IOException {
+        String serviceName = serviceNames.getOrDefault(configName, null);
+        if (serviceName == null) {
+            //response.setHeader("Location", "/error404");
+            //response.setStatus(302);
+            response.setStatus(404);
+        }
+        byte[] data = processorFactory.getProcCfg(serviceName);
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + serviceName + ".cfg\"");
+        InputStream dataStream = new ByteArrayInputStream(data);
+        dataStream.transferTo(response.getOutputStream());
+        response.flushBuffer();
+    }
 }

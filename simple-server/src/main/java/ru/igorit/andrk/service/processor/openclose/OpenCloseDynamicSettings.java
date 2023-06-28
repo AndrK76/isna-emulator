@@ -13,8 +13,10 @@ import java.util.stream.Collectors;
 @Getter
 public class OpenCloseDynamicSettings {
     private boolean checkUniqueMessageId = false;
-    private boolean checkUniqueResponseId = false;
+    private boolean checkUniqueReference = false;
     private boolean validateAccountState = false;
+
+    private boolean validateOperationDate = false;
 
     public static OpenCloseDynamicSettings create(List<StoredSetting> storedSettings) {
         var ret = new OpenCloseDynamicSettings();
@@ -22,8 +24,9 @@ public class OpenCloseDynamicSettings {
                 .map(StoredSettingDTO::new)
                 .collect(Collectors.toMap(StoredSettingDTO::getKey, StoredSettingDTO::getValue));
         ret.checkUniqueMessageId = getStoredBool(stored, "CheckUniqueMessageId", ret.checkUniqueMessageId);
-        ret.checkUniqueResponseId = getStoredBool(stored, "CheckUniqueResponseId", ret.checkUniqueMessageId);
-        ret.validateAccountState = getStoredBool(stored, "ValidateAccountState", ret.checkUniqueMessageId);
+        ret.checkUniqueReference = getStoredBool(stored, "CheckUniqueReference", ret.checkUniqueReference);
+        ret.validateAccountState = getStoredBool(stored, "ValidateAccountState", ret.validateAccountState);
+        ret.validateOperationDate = getStoredBool(stored, "ValidateOperationDate", ret.validateOperationDate);
         return ret;
     }
 

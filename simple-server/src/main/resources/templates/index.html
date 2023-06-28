@@ -24,6 +24,10 @@
         <div class="col">Адрес сервиса уведомления об открытии/закрытии и изменении счетов:</div>
         <div class="col"><span class="fw-bold text-decoration-underline" th:text="${openCloseAddress}">http://none</span></div>
     </div>
+    <div class="row mb-3">
+        <div class="col">Каталог для файлов настройки сервисов:</div>
+        <div class="col"><span class="fw-bold text-decoration-underline" th:text="proc_cfg">http://none</span></div>
+    </div>
     <div class="row">
         <div class="col col-auto">
             <ul class="nav flex-column nav-underline">
@@ -31,6 +35,10 @@
                 <li class="nav-item">
                     <a class="nav-link link-dark" href="#" target="_blank" th:href="${openCloseWsdl}">
                         WSDL сервиса уведомления об открытии/закрытии<br />и изменении счетов</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link link-dark" href="#" th:href="'/config/open-close'">
+                        Конфигурация сервиса уведомления об открытии/закрытии<br />и изменении счетов</a>
                 </li>
                 <!--<li class="nav-item">
                     <a class="nav-link link-dark" href="#">

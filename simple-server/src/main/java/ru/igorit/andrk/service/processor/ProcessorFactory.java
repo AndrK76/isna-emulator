@@ -39,7 +39,7 @@ public class ProcessorFactory {
         return processors.get(document);
     }
 
-    private byte[] getProcCfg(String procKey) {
+    public byte[] getProcCfg(String procKey) {
         byte[] config = null;
         String[] cfgTypes = new String[]{EXTERNAL_CFG, INTERNAL_CFG};
         for (int i = 0; i < cfgTypes.length && config == null; i++) {

@@ -1,9 +1,7 @@
 package ru.igorit.andrk.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -14,6 +12,7 @@ import java.util.*;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity(name = "open_close_requests")
 public class OpenCloseRequest implements Comparable<OpenCloseRequest> {
     @Id
@@ -22,6 +21,7 @@ public class OpenCloseRequest implements Comparable<OpenCloseRequest> {
 
     @NonNull
     @Column(name = "message_id")
+    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID messageId;
 
     @NonNull
@@ -45,6 +45,7 @@ public class OpenCloseRequest implements Comparable<OpenCloseRequest> {
     public OpenCloseRequest(Request request) {
         this();
         this.rawRequest = request;
+        this.messageId = request.getMessageId();
     }
     @Override
     public int compareTo(OpenCloseRequest o) {

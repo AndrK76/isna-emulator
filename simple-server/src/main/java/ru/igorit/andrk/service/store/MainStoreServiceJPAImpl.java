@@ -29,7 +29,8 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             RequestRepository reqRepo,
             ResponseRepository respRepo,
             OpenCloseRequestRepository ocReqRepo,
-            OpenCloseResponseRepository ocRespRepo, SettingRepository setRepo) {
+            OpenCloseResponseRepository ocRespRepo,
+            SettingRepository setRepo) {
         this.reqRepo = reqRepo;
         this.respRepo = respRepo;
         this.ocReqRepo = ocReqRepo;
@@ -73,6 +74,14 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             return null;
         }
         return reqRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean containRequestWithMessageId(Request request) {
+        long cou = request.getId() == null
+                ? reqRepo.countByMessageId(request.getMessageId())
+                : reqRepo.countByMessageIdAndIdNot(request.getMessageId(), request.getId());
+        return cou != 0;
     }
 
     @Override
@@ -166,6 +175,14 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     }
 
     @Override
+    public boolean containOpenCloseRequestWithReference(OpenCloseRequest request) {
+        long cou = request.getId() == null
+                ? ocReqRepo.countByReference(request.getReference())
+                : ocReqRepo.countByReferenceAndIdNot(request.getReference(), request.getId());
+        return cou != 0;
+    }
+
+    @Override
     @Transactional
     public OpenCloseResponse saveOpenCloseResponse(OpenCloseResponse response) {
         OpenCloseRequest request = response.getRequest();
@@ -183,11 +200,12 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             return null;
         }
         var ret = ocRespRepo.findById(id).orElse(null);
-        if (loadAccounts) {
+        if (ret != null && loadAccounts) {
             var cou = ret.getAccounts().size();
         }
         return ret;
     }
+
     @Override
     @Transactional
     public OpenCloseResponse getOpenCloseResponseById(Long id) {
@@ -209,10 +227,19 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     public List<OpenCloseResponse> getOpenCloseResponsesForRequests(List<OpenCloseRequest> requests) {
         var minRequest = requests.stream().min(OpenCloseRequest::compareTo).orElse(null);
         var maxRequest = requests.stream().max(OpenCloseRequest::compareTo).orElse(null);
-        if (minRequest == null || maxRequest == null) {
+        if (minRequest == null) {
             return new ArrayList<>();
         }
         return ocRespRepo.findAllByRequestBetween(minRequest, maxRequest);
+    }
+
+    @Override
+    public OpenCloseResponseAccount lastResponseForAccountByOperTypeAndResult(String accountNum, Integer operType, String resultCode) {
+        var res = ocRespRepo.findLastAccountsByCondition(accountNum, operType, resultCode, makePageCondition(1));
+        if (res.getContent().size() == 0) {
+            return null;
+        }
+        return res.getContent().get(0);
     }
 
     @Override
@@ -237,6 +264,10 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
         } else {
             return PageRequest.of(0, count, Sort.by("id"));
         }
+    }
+
+    private Pageable makePageCondition(int count) {
+        return PageRequest.of(0, count);
     }
 
 }

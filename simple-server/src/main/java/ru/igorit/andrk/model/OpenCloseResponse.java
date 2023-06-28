@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -31,6 +32,7 @@ public class OpenCloseResponse {
 
     @NonNull
     @Column(name = "message_id")
+    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID messageId;
 
     @NonNull

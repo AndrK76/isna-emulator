@@ -18,10 +18,13 @@
             const apiUrl = '/api/' + '[[${restApiVersion}]]';
             const serviceName = '[[${serviceName}]]';
         </script>
-
     </div>
-
 </div>
+
+<div th:if="${mode} == 'open-close'">
+    <div th:replace="fragments/manage/open-close.html :: open_close_form"/>
+</div>
+
 
 </body>
 </html>

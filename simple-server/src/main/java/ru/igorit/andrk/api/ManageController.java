@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/" + Constants.API_VERSION)
@@ -116,39 +117,36 @@ public class ManageController {
         return ret;
     }
 
-    @GetMapping("/settings/{service}")
+    @GetMapping("/setting/{service}")
     public List<StoredSettingDTO> getSettingsForService(
             @PathVariable(name = "service") String serviceName) {
         List<StoredSetting> data = mainStore.getSettingsByGroup(serviceName);
-        /*
-        StoredSettingKey key = new StoredSettingKey(serviceName,"CheckUniqueMessageId");
-        StoredSetting set = new StoredSetting(key, false);
-        data.add(mainStore.saveSetting(set));
-        key = new StoredSettingKey(serviceName,"CheckUniqueResponseId");
-        set = new StoredSetting(key, false);
-        data.add(mainStore.saveSetting(set));
-        key = new StoredSettingKey(serviceName,"ValidateAccountState");
-        set = new StoredSetting(key, false);
-        data.add(mainStore.saveSetting(set));
-
-        key = new StoredSettingKey(serviceName,"TestString");
-        set = new StoredSetting(key, "Строка 1");
-        data.add(mainStore.saveSetting(set));
-        key = new StoredSettingKey(serviceName,"TestLong");
-        set = new StoredSetting(key, Long.valueOf(10L));
-        data.add(mainStore.saveSetting(set));
-        key = new StoredSettingKey(serviceName,"TestDouble");
-        set = new StoredSetting(key, Double.valueOf(15.2));
-        data.add(mainStore.saveSetting(set));
-        key = new StoredSettingKey(serviceName,"TestLocalDateTime");
-        set = new StoredSetting(key, LocalDateTime.now().withNano(0));
-        data.add(mainStore.saveSetting(set));
-        key = new StoredSettingKey(serviceName,"TestLocalDate");
-        set = new StoredSetting(key, LocalDate.now());
-        data.add(mainStore.saveSetting(set));
-*/
-
         return StoredSettingDTO.create(data);
+    }
+
+    @GetMapping("/setting/{service}/{setting}")
+    public Object getSettingForService(
+            @PathVariable(name = "service") String serviceName,
+            @PathVariable(name = "setting") String setting) {
+        StoredSettingKey key = new StoredSettingKey(serviceName, setting);
+        var storedSetting = mainStore.getSetting(key);
+        if (storedSetting==null){
+            return null;
+        }
+        return storedSetting.getValue();
+    }
+
+    @PostMapping("/setting/{service}/{setting}")
+    public Object setSettingForService(
+            @PathVariable(name = "service") String serviceName,
+            @PathVariable(name = "setting") String setting,
+            @RequestBody Object value) {
+        StoredSettingKey key = new StoredSettingKey(serviceName, setting);
+        var storedSetting = Optional
+                .ofNullable(mainStore.getSetting(key))
+                .orElse(new StoredSetting(key, value));
+        storedSetting.setValue(value);
+        return mainStore.saveSetting(storedSetting).getValue();
     }
 
 }
