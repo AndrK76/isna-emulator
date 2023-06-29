@@ -15,8 +15,8 @@ public class OpenCloseDynamicSettings {
     private boolean checkUniqueMessageId = false;
     private boolean checkUniqueReference = false;
     private boolean validateAccountState = false;
-
     private boolean validateOperationDate = false;
+    private boolean raiseTestError = true;
 
     public static OpenCloseDynamicSettings create(List<StoredSetting> storedSettings) {
         var ret = new OpenCloseDynamicSettings();
@@ -27,6 +27,7 @@ public class OpenCloseDynamicSettings {
         ret.checkUniqueReference = getStoredBool(stored, "CheckUniqueReference", ret.checkUniqueReference);
         ret.validateAccountState = getStoredBool(stored, "ValidateAccountState", ret.validateAccountState);
         ret.validateOperationDate = getStoredBool(stored, "ValidateOperationDate", ret.validateOperationDate);
+        ret.raiseTestError = getStoredBool(stored, "RaiseTestError", ret.raiseTestError);
         return ret;
     }
 

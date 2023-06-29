@@ -20,7 +20,7 @@ function setCheckName(element){
 }
 
 function save(){
-    let names = ["CheckUniqueMessageId", "CheckUniqueReference", "ValidateAccountState"];
+    let names = ["CheckUniqueMessageId", "CheckUniqueReference", "ValidateAccountState", "ValidateOperationDate","RaiseTestError"];
     $.each(names, function (key, name) {
         let el = $('#' + name);
         let val = $(el).is(':checked') 

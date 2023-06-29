@@ -199,45 +199,13 @@ public class OpenCloseProcessor implements DataProcessor {
                 account.setDateModify((LocalDateTime) getBlockValue("acc_date_ch", content, inputFormat, emptyItems, id));
 
                 OpenCloseResult parseRowResult;
-                if (dynSettings.isCheckUniqueMessageId() && mainStoreService.containRequestWithMessageId(request.getRawRequest())) {
-                    parseRowResult = new OpenCloseResult(results.get("DUPLICATE_MSGID"));
-                    parseRowResult.setText(
-                            parseRowResult.getText().replace("%%{MESSAGE_ID}%%",
-                                    request.getMessageId().toString()));
-                } else if (dynSettings.isCheckUniqueReference() && mainStoreService.containOpenCloseRequestWithReference(request)) {
-                    parseRowResult = new OpenCloseResult(results.get("DUPLICATE_REFERENCE"));
-                    parseRowResult.setText(
-                            parseRowResult.getText().replace("%%{REFERENCE}%%",
-                                    request.getReference()));
-                } else if (emptyItems.size() > 0) {
-                    parseRowResult = new OpenCloseResult(results.get("EMPTY_FIELD"));
-                    parseRowResult.setText(
-                            parseRowResult.getText().replace("%%{FIELD}%%",
-                                    String.join(", ", emptyItems)));
-                } else if (!checkTypeOper(account)) {
-                    parseRowResult = new OpenCloseResult(results.get("INVALID_OPER_TYPE"));
-                    parseRowResult.setText(
-                            parseRowResult.getText().replace("%%{TYPE_OPER}%%",
-                                    account.getOperType().toString()));
-                    parseRowResult.setText(
-                            parseRowResult.getText().replace("%%{CODE_FORM}%%",
-                                    account.getRequest().getCodeForm()));
-                } else if (!checkTypeAccount(account)) {
-                    parseRowResult = new OpenCloseResult(results.get("INVALID_ACC_TYPE"));
-                    parseRowResult.setText(
-                            parseRowResult.getText().replace("%%{ACC_TYPE}%%",
-                                    account.getAccountType()));
+                if (dynSettings.isRaiseTestError()) {
+                    parseRowResult = new OpenCloseResult(results.get("TEST_ERROR"));
                 } else {
-                    parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
-                    if (dynSettings.isValidateAccountState() || dynSettings.isValidateOperationDate()){
-                        var lastOpen = mainStoreService.lastResponseForAccountByOperTypeAndResult(
-                                account.getAccount(),1,"01");
-                        var lastClose = mainStoreService.lastResponseForAccountByOperTypeAndResult(
-                                account.getAccount(),2, "01");
-                        var lastChange = mainStoreService.lastResponseForAccountByOperTypeAndResult(
-                                account.getAccount(),9, "01");
-                        System.out.println("rrr");
-
+                    parseRowResult = checkMainConditions(request, dynSettings, account, emptyItems);
+                    if (parseRowResult.getId().equals("SUCCESS")
+                            && (dynSettings.isValidateAccountState() || dynSettings.isValidateOperationDate())) {
+                        parseRowResult = checkDopConditions(dynSettings, account);
                     }
                 }
                 parseDataResult.put(id, parseRowResult);
@@ -252,7 +220,6 @@ public class OpenCloseProcessor implements DataProcessor {
             }
         }
     }
-
 
     private Object getBlockValue(String itemName,
                                  MtContent content,
@@ -290,7 +257,144 @@ public class OpenCloseProcessor implements DataProcessor {
         return Arrays.asList(validTypes).contains(accType);
     }
 
+    //TODO: автотесты не стал делать - обошёлся ручным
+    // для реальной системы ошибки могут быть другими
+    // проверки только из предполагаемого поведения эмулируемого сервиса
+    private OpenCloseResult checkMainConditions(
+            OpenCloseRequest request,
+            OpenCloseDynamicSettings dynSettings,
+            OpenCloseRequestAccount account,
+            Set<String> emptyItems) {
+        OpenCloseResult parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
+        if (dynSettings.isCheckUniqueMessageId() && mainStoreService.containRequestWithMessageId(request.getRawRequest())) {
+            parseRowResult = new OpenCloseResult(results.get("DUPLICATE_MSGID"));
+            parseRowResult.setText(
+                    parseRowResult.getText().replace("%%{MESSAGE_ID}%%",
+                            request.getMessageId().toString()));
+        } else if (dynSettings.isCheckUniqueReference() && mainStoreService.containOpenCloseRequestWithReference(request)) {
+            parseRowResult = new OpenCloseResult(results.get("DUPLICATE_REFERENCE"));
+            parseRowResult.setText(
+                    parseRowResult.getText().replace("%%{REFERENCE}%%",
+                            request.getReference()));
+        } else if (emptyItems.size() > 0) {
+            parseRowResult = new OpenCloseResult(results.get("EMPTY_FIELD"));
+            parseRowResult.setText(
+                    parseRowResult.getText().replace("%%{FIELD}%%",
+                            String.join(", ", emptyItems)));
+        } else if (!checkTypeOper(account)) {
+            parseRowResult = new OpenCloseResult(results.get("INVALID_OPER_TYPE"));
+            parseRowResult.setText(
+                    parseRowResult.getText().replace("%%{TYPE_OPER}%%",
+                            account.getOperType().toString()));
+            parseRowResult.setText(
+                    parseRowResult.getText().replace("%%{CODE_FORM}%%",
+                            account.getRequest().getCodeForm()));
+        } else if (!checkTypeAccount(account)) {
+            parseRowResult = new OpenCloseResult(results.get("INVALID_ACC_TYPE"));
+            parseRowResult.setText(
+                    parseRowResult.getText().replace("%%{ACC_TYPE}%%",
+                            account.getAccountType()));
+        }
+        return parseRowResult;
+    }
 
+    //TODO: Tag=NoTested
+    // для реального приложения здесь обязательно нужны автотесты,
+    // но в рамках эмулятора ошибка здесь не смертельна, делать не стал
+    // Сделано просто для эмуляции осмысленного сообщения об ошибке
+    // Поведение приложения для которого делается не зависит от полученного кода ошибки
+    // и все они зависят от содержимого базы эмулятора
+
+    private OpenCloseResult checkDopConditions(
+            OpenCloseDynamicSettings dynSettings,
+            OpenCloseRequestAccount account) {
+
+        var lastOpen = mainStoreService.lastResponseForAccountByOperTypeAndResult(
+                account.getAccount(), 1, "01");
+        var lastClose = mainStoreService.lastResponseForAccountByOperTypeAndResult(
+                account.getAccount(), 2, "01");
+        var lastChange = mainStoreService.lastResponseForAccountByOperTypeAndResult(
+                account.getAccount(), 9, "01");
+        LocalDateTime lastOpenDate = (lastOpen == null ? null : lastOpen.getOperDate());
+        if (lastChange != null && (lastOpen == null || lastChange.getOperDate().compareTo(lastOpenDate) > 0)) {
+            lastOpenDate = lastChange.getOperDate();
+        }
+        LocalDateTime lastCloseDate = (lastClose == null ? null : lastClose.getOperDate());
+
+        OpenCloseResult parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
+        if (dynSettings.isValidateAccountState()) {
+            parseRowResult = checkOnAccountState(account, lastOpenDate, lastCloseDate);
+        }
+        if (dynSettings.isValidateOperationDate() && parseRowResult.getId().equals("SUCCESS")) {
+            parseRowResult = checkOnOperationDate(account, lastOpenDate, lastCloseDate);
+        }
+        return parseRowResult;
+
+    }
+
+    //TODO: Tag=NoTested
+    private OpenCloseResult checkOnAccountState(
+            OpenCloseRequestAccount account,
+            LocalDateTime lastOpenDate,
+            LocalDateTime lastCloseDate
+    ) {
+        OpenCloseResult parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
+        if (account.getOperType() == 1) {
+            if (lastOpenDate != null && (lastCloseDate == null || lastOpenDate.compareTo(lastCloseDate) >= 0)) {
+                parseRowResult = new OpenCloseResult(results.get("EXIST_ACC"));
+                parseRowResult.setText(
+                        parseRowResult.getText().replace("%%{ACCOUNT}%%", account.getAccount()));
+            } else if (lastOpenDate != null && lastOpenDate.compareTo(account.getOperDate()) > 0 ||
+                    lastCloseDate != null && lastCloseDate.compareTo(account.getOperDate()) > 0) {
+                parseRowResult = new OpenCloseResult(results.get("INVALID_DATE"));
+                parseRowResult.setText(
+                        parseRowResult.getText().replace("%%{ACCOUNT}%%", account.getAccount()));
+            }
+        } else if (account.getOperType() == 2) {
+            if (lastOpenDate == null) {
+                parseRowResult = new OpenCloseResult(results.get("NOEXIST_ACC"));
+            } else if (
+                    lastCloseDate != null && (lastOpenDate == null || lastOpenDate.compareTo(lastCloseDate) < 0)
+                            && lastCloseDate.compareTo(account.getOperDate()) > 0) {
+                parseRowResult = new OpenCloseResult(results.get("CLOSED_ACC"));
+                parseRowResult.setText(
+                        parseRowResult.getText().replace("%%{CLOSE_DATE}%%", account.getOperDate().toString()));
+            }
+        } else if (account.getOperType() == 9) {
+            if (lastOpenDate != null && lastCloseDate == null) {
+                parseRowResult = new OpenCloseResult(results.get("EXIST_ACC"));
+                parseRowResult.setText(
+                        parseRowResult.getText().replace("%%{ACCOUNT}%%", account.getAccount()));
+            } else if (lastCloseDate != null) {
+                parseRowResult = new OpenCloseResult(results.get("CLOSED_ACC"));
+                parseRowResult.setText(
+                        parseRowResult.getText().replace("%%{CLOSE_DATE}%%", account.getOperDate().toString()));
+            }
+        }
+        return parseRowResult;
+    }
+
+    //TODO: Tag=NoTested
+    private OpenCloseResult checkOnOperationDate(
+            OpenCloseRequestAccount account,
+            LocalDateTime lastOpenDate,
+            LocalDateTime lastCloseDate
+    ) {
+        OpenCloseResult parseRowResult = new OpenCloseResult(results.get("SUCCESS"));
+        if (account.getOperType() == 2) {
+            if (lastOpenDate == null) {
+                parseRowResult = new OpenCloseResult(results.get("NOEXIST_ACC"));
+            } else if (account.getOperDate().compareTo(lastOpenDate) < 0) {
+                parseRowResult = new OpenCloseResult(results.get("INVALID_CLOSEDATE"));
+                parseRowResult.setText(
+                        parseRowResult.getText()
+                                .replace("%%{CLOSE_DATE}%%", account.getOperDate().toString())
+                                .replace("%%{OPEN_DATE}%%", lastOpenDate.toString()));
+
+            }
+        }
+        return parseRowResult;
+    }
 
     private OpenCloseResponse makeResponse(MtContent content,
                                            MtFormat format,

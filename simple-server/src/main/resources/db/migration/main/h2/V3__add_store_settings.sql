@@ -18,6 +18,8 @@ insert into stored_settings (grp_name, setting_name, setting_value, value_type)
 values ('ISNA_BVU_BA_OPEN_CLOSE', 'ValidateAccountState', 'false', 'java.lang.Boolean');
 insert into stored_settings (grp_name, setting_name, setting_value, value_type)
 values ('ISNA_BVU_BA_OPEN_CLOSE', 'ValidateOperationDate', 'false', 'java.lang.Boolean');
+insert into stored_settings (grp_name, setting_name, setting_value, value_type)
+values ('ISNA_BVU_BA_OPEN_CLOSE', 'RaiseTestError', 'false', 'java.lang.Boolean');
 
 /*
 INSERT INTO stored_settings(grp_name, setting_name, setting_value, value_type)

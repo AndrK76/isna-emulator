@@ -7,6 +7,12 @@
 <body>
 <div class="container" th:fragment="open_close_form">
     <div class="mt-3 row" id="settings">
+        <label class="col col-8 col-form-label">Выводить тестовую ошибку при проверке:</label>
+        <div class="col col-4 form-check">
+            <input class="form-check-input" type="checkbox" value="" id="RaiseTestError"
+                   onclick="setCheckName('RaiseTestError');">
+            <label class="form-check-label" for="CheckUniqueMessageId" id="lblRaiseTestError"></label>
+        </div>
         <label class="col col-8 col-form-label">Проверять уникальность сообщения:</label>
         <div class="col col-4 form-check">
             <input class="form-check-input" type="checkbox" value="" id="CheckUniqueMessageId"

@@ -6,6 +6,7 @@ server:
 spring:
   datasource:
     main:
+      #url: jdbc:h2:mem:kgd
       #url: jdbc:h2:file:./kgd
       url: jdbc:postgresql://localhost:5430/demoDB
       username: test
@@ -13,9 +14,13 @@ spring:
   jpa:
     open-in-view: false
     show-sql: false
+    #show-sql: true
     hibernate:
       ddl-auto: none
+      #ddl-auto: validate
+      #ddl-auto: update
       generate-ddl: false
+      #generate-ddl: true
   flyway:
     enabled: false
     main:
@@ -29,8 +34,11 @@ api:
 
 logging:
   level:
-    root: warn
-    ru.igorit.andrk: info
-    org.springframework.boot.web.embedded.tomcat: info
+    root: INFO
+    ru.igorit.andrk: DEBUG
+    #ru.igorit.andrk: TRACE
+    org.hibernate.SQL: DEBUG
+    #org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor: debug
+    org.flywaydb: info
     org.flywaydb.core.internal.license: fatal
-    org.flywaydb.core.internal.database: info
