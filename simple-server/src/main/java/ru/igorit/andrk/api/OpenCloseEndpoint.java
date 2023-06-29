@@ -8,6 +8,7 @@ import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
+import ru.igorit.andrk.config.services.Constants;
 import ru.igorit.andrk.service.processor.ProcessResult;
 import ru.igorit.andrk.service.processor.ProcessorException;
 import ru.igorit.andrk.service.processor.ProcessorFactory;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static ru.igorit.andrk.config.services.Constants.DEFAULT_NAMESPACE;
+import static ru.igorit.andrk.config.services.Constants.SEND_MESSAGE;
 import static ru.igorit.andrk.utils.DataHandler.toXmlDate;
 
 @Endpoint
@@ -41,7 +43,7 @@ public class OpenCloseEndpoint {
     }
 
 
-    @PayloadRoot(namespace = DEFAULT_NAMESPACE, localPart = "SendMessage")
+    @PayloadRoot(namespace = DEFAULT_NAMESPACE, localPart = SEND_MESSAGE)
     @ResponsePayload
     public JAXBElement<SendMessageResponse> sendMessage(
             @RequestPayload JAXBElement<SendMessage> message) throws DatatypeConfigurationException {

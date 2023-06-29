@@ -1,18 +1,20 @@
 package ru.igorit.andrk.api;
 
+import org.apache.catalina.Store;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.igorit.andrk.config.services.Constants;
 import ru.igorit.andrk.dto.*;
-import ru.igorit.andrk.model.OpenCloseRequest;
-import ru.igorit.andrk.model.OpenCloseRequestAccount;
-import ru.igorit.andrk.model.OpenCloseResponse;
-import ru.igorit.andrk.model.Request;
+import ru.igorit.andrk.model.*;
 import ru.igorit.andrk.service.MainStoreService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/" + Constants.API_VERSION)
@@ -113,6 +115,38 @@ public class ManageController {
         OpenCloseResponse response = mainStore.getOpenCloseResponseById(id, true);
         OpenCloseResponseForRequestDTO ret = OpenCloseResponseForRequestDTO.create(response, true);
         return ret;
+    }
+
+    @GetMapping("/setting/{service}")
+    public List<StoredSettingDTO> getSettingsForService(
+            @PathVariable(name = "service") String serviceName) {
+        List<StoredSetting> data = mainStore.getSettingsByGroup(serviceName);
+        return StoredSettingDTO.create(data);
+    }
+
+    @GetMapping("/setting/{service}/{setting}")
+    public Object getSettingForService(
+            @PathVariable(name = "service") String serviceName,
+            @PathVariable(name = "setting") String setting) {
+        StoredSettingKey key = new StoredSettingKey(serviceName, setting);
+        var storedSetting = mainStore.getSetting(key);
+        if (storedSetting==null){
+            return null;
+        }
+        return storedSetting.getValue();
+    }
+
+    @PostMapping("/setting/{service}/{setting}")
+    public Object setSettingForService(
+            @PathVariable(name = "service") String serviceName,
+            @PathVariable(name = "setting") String setting,
+            @RequestBody Object value) {
+        StoredSettingKey key = new StoredSettingKey(serviceName, setting);
+        var storedSetting = Optional
+                .ofNullable(mainStore.getSetting(key))
+                .orElse(new StoredSetting(key, value));
+        storedSetting.setValue(value);
+        return mainStore.saveSetting(storedSetting).getValue();
     }
 
 }

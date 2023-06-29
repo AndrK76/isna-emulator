@@ -79,8 +79,8 @@ function showHideRequestAccounts(idRequest, onlyHide) {
                 content += '<table class="table table-bordered table-responsive w-100 caption-top">';
                 content += '<caption>Счета запроса</caption>';
                 content += '<tr><th>Счет</th><th>БИК</th><th>Тип</th><th>Опер</th>'
-                    + '<th>Дата</th><th>РНН</th><th>Договор</th><th>Договор</th>'
-                    + '<th>от</th><th>Счет (стар)</th><th>Дат. изм</th></tr><tbody>';
+                    + '<th>Дата</th><th>РНН</th><th>Договор</th>'
+                    + '<th>от</th><th>БИК (стар)</th><th>Счет (стар)</th><th>Дат. изм</th></tr><tbody>';
                 for (let i = 0; i < data.accounts.length; i++) {
                     let account = data.accounts[i];
                     content += '<tr>';
@@ -130,7 +130,7 @@ function showHideResponseAccounts(idRequest, idResponse, onlyHide) {
                 content += '<caption>Счета ответа</caption>';
                 content += '<tr><th>Счет</th><th>БИК</th><th>Тип</th><th>Опер</th>'
                     + '<th>Дата</th><th>Результат</th><th>Ошибка</th><th>РНН</th><th>Договор</th>'
-                    + '<th>Договор</th><th>от</th><th>Счет (стар)</th><th>Дат. изм</th></tr><tbody>';
+                    + '<th>от</th><th>БИК (стар)</th><th>Счет (стар)</th><th>Дат. изм</th></tr><tbody>';
                 for (let i = 0; i < data.accounts.length; i++) {
                     let account = data.accounts[i];
                     content += '<tr>';

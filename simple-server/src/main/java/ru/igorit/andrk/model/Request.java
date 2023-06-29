@@ -1,11 +1,10 @@
 package ru.igorit.andrk.model;
 
 
-import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+import org.hibernate.annotations.Type;
+import org.hibernate.type.UUIDCharType;
 import org.springframework.lang.NonNull;
 
 
@@ -17,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
+@Builder
 @Entity(name = "requests")
 @EqualsAndHashCode(of = "id")
 public class Request implements Comparable<Request>{
@@ -26,6 +26,7 @@ public class Request implements Comparable<Request>{
     private Long id;
 
     @Column(name = "message_id")
+    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID messageId;
 
     @Column(name = "service_id")

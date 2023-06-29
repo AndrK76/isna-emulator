@@ -1,25 +1,21 @@
 package ru.igorit.andrk.service.store;
 
+import lombok.Builder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.igorit.andrk.model.OpenCloseRequest;
-import ru.igorit.andrk.model.OpenCloseResponse;
-import ru.igorit.andrk.model.Request;
-import ru.igorit.andrk.model.Response;
-import ru.igorit.andrk.repository.main.OpenCloseRequestRepository;
-import ru.igorit.andrk.repository.main.OpenCloseResponseRepository;
-import ru.igorit.andrk.repository.main.RequestRepository;
-import ru.igorit.andrk.repository.main.ResponseRepository;
+import ru.igorit.andrk.model.*;
+import ru.igorit.andrk.repository.main.*;
 import ru.igorit.andrk.service.MainStoreService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Builder
 public class MainStoreServiceJPAImpl implements MainStoreService {
 
     private final RequestRepository reqRepo;
@@ -27,15 +23,19 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     private final OpenCloseRequestRepository ocReqRepo;
     private final OpenCloseResponseRepository ocRespRepo;
 
+    private final SettingRepository setRepo;
+
     public MainStoreServiceJPAImpl(
             RequestRepository reqRepo,
             ResponseRepository respRepo,
             OpenCloseRequestRepository ocReqRepo,
-            OpenCloseResponseRepository ocRespRepo) {
+            OpenCloseResponseRepository ocRespRepo,
+            SettingRepository setRepo) {
         this.reqRepo = reqRepo;
         this.respRepo = respRepo;
         this.ocReqRepo = ocReqRepo;
         this.ocRespRepo = ocRespRepo;
+        this.setRepo = setRepo;
     }
 
     @Override
@@ -74,6 +74,14 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             return null;
         }
         return reqRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public boolean containRequestWithMessageId(Request request) {
+        long cou = request.getId() == null
+                ? reqRepo.countByMessageId(request.getMessageId())
+                : reqRepo.countByMessageIdAndIdNot(request.getMessageId(), request.getId());
+        return cou != 0;
     }
 
     @Override
@@ -118,6 +126,11 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     @Override
     @Transactional
     public OpenCloseRequest saveOpenCloseRequest(OpenCloseRequest request) {
+        Request rawRequest = request.getRawRequest();
+        if (rawRequest.getId() != null) {
+            rawRequest = reqRepo.getReferenceById(rawRequest.getId());
+            request.setRawRequest(rawRequest);
+        }
         return ocReqRepo.save(request);
     }
 
@@ -162,8 +175,21 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     }
 
     @Override
+    public boolean containOpenCloseRequestWithReference(OpenCloseRequest request) {
+        long cou = request.getId() == null
+                ? ocReqRepo.countByReference(request.getReference())
+                : ocReqRepo.countByReferenceAndIdNot(request.getReference(), request.getId());
+        return cou != 0;
+    }
+
+    @Override
     @Transactional
     public OpenCloseResponse saveOpenCloseResponse(OpenCloseResponse response) {
+        OpenCloseRequest request = response.getRequest();
+        if (request.getId() != null) {
+            request = ocReqRepo.getReferenceById(request.getId());
+            response.setRequest(request);
+        }
         return ocRespRepo.save(response);
     }
 
@@ -174,11 +200,12 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             return null;
         }
         var ret = ocRespRepo.findById(id).orElse(null);
-        if (loadAccounts) {
+        if (ret != null && loadAccounts) {
             var cou = ret.getAccounts().size();
         }
         return ret;
     }
+
     @Override
     @Transactional
     public OpenCloseResponse getOpenCloseResponseById(Long id) {
@@ -200,10 +227,35 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
     public List<OpenCloseResponse> getOpenCloseResponsesForRequests(List<OpenCloseRequest> requests) {
         var minRequest = requests.stream().min(OpenCloseRequest::compareTo).orElse(null);
         var maxRequest = requests.stream().max(OpenCloseRequest::compareTo).orElse(null);
-        if (minRequest == null || maxRequest == null) {
+        if (minRequest == null) {
             return new ArrayList<>();
         }
         return ocRespRepo.findAllByRequestBetween(minRequest, maxRequest);
+    }
+
+    @Override
+    public OpenCloseResponseAccount lastResponseForAccountByOperTypeAndResult(String accountNum, Integer operType, String resultCode) {
+        var res = ocRespRepo.findLastAccountsByCondition(accountNum, operType, resultCode, makePageCondition(1));
+        if (res.getContent().size() == 0) {
+            return null;
+        }
+        return res.getContent().get(0);
+    }
+
+    @Override
+    public List<StoredSetting> getSettingsByGroup(String groupName) {
+        return setRepo.findAllByGroupName(groupName);
+    }
+
+    @Override
+    @Transactional
+    public StoredSetting saveSetting(StoredSetting setting) {
+        return setRepo.saveAndFlush(setting);
+    }
+
+    @Override
+    public StoredSetting getSetting(StoredSettingKey key) {
+        return setRepo.findById(key).orElse(null);
     }
 
     private Pageable makePageCondition(int count, boolean descending) {
@@ -212,6 +264,10 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
         } else {
             return PageRequest.of(0, count, Sort.by("id"));
         }
+    }
+
+    private Pageable makePageCondition(int count) {
+        return PageRequest.of(0, count);
     }
 
 }

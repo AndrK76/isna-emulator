@@ -13,7 +13,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-@Entity(name = "open_close_response_accounts")
+@Entity
+@Table(name = "open_close_response_accounts")
 public class OpenCloseResponseAccount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

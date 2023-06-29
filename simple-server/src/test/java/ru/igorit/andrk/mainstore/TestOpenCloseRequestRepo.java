@@ -17,7 +17,11 @@ import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.Random;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
@@ -42,7 +46,10 @@ public class TestOpenCloseRequestRepo {
 
     @BeforeEach
     private void initService() {
-        svc = new MainStoreServiceJPAImpl(mainReqRepo, null, ocReqRepo, null);
+        svc = MainStoreServiceJPAImpl.builder()
+                .reqRepo(mainReqRepo)
+                .ocReqRepo(ocReqRepo)
+                .build();
     }
 
     @Test
@@ -96,7 +103,7 @@ public class TestOpenCloseRequestRepo {
             var ocReq1 = svc.getOpenCloseRequestById(ocReqId);
             var size = ocReq1.getAccounts().size();
             entityManager.detach(ocReq1);
-            if (size != 3){
+            if (size != 3) {
                 throw new RuntimeException("Incorrect account Size after Lazy load");
             }
         });
@@ -105,11 +112,42 @@ public class TestOpenCloseRequestRepo {
             var ocReq1 = svc.getOpenCloseRequestById(ocReqId, true);
             entityManager.detach(ocReq1);
             var size = ocReq1.getAccounts().size();
-            if (size != 3){
+            if (size != 3) {
                 throw new RuntimeException("Incorrect account Size after Lazy load");
             }
         });
 
+    }
+
+    @Test
+    @DisplayName("Test Exist by Reference")
+    public void testExistByReference() {
+        var request = makeMainRequest();
+        request = svc.saveRequest(request);
+        var ocRequest = makeOCRequest(request, 3);
+        svc.saveOpenCloseRequest(ocRequest);
+        var reference = ocRequest.getReference();
+        request = makeMainRequest();
+        request = svc.saveRequest(request);
+        svc.saveOpenCloseRequest(makeOCRequest(request, 4));
+        request = makeMainRequest();
+        request = svc.saveRequest(request);
+        ocRequest = OpenCloseRequest.builder()
+                .rawRequest(request)
+                .messageId(ocRequest.getMessageId())
+                .codeForm(ocRequest.getCodeForm())
+                .reference(reference)
+                .notifyDate(ocRequest.getNotifyDate())
+                .build();
+
+        assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isTrue();
+        svc.saveOpenCloseRequest(ocRequest);
+        assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isTrue();
+        request = makeMainRequest();
+        ocRequest = makeOCRequest(request, 5);
+        assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isFalse();
+        svc.saveOpenCloseRequest(ocRequest);
+        assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isFalse();
     }
 
 
@@ -124,6 +162,11 @@ public class TestOpenCloseRequestRepo {
     private OpenCloseRequest makeOCRequest(Request request, int accountCounts) {
         OpenCloseRequest ocRequest = new OpenCloseRequest(request);
         ocRequest.setCodeForm("TEST");
+        ocRequest.setNotifyDate(LocalDateTime.now());
+        byte[] array = new byte[10];
+        new Random().nextBytes(array);
+        String generatedString = new String(array, StandardCharsets.UTF_8);
+        ocRequest.setReference(generatedString);
         var accounts = ocRequest.getAccounts();
         for (int i = 0; i < accountCounts; i++) {
             var account = new OpenCloseRequestAccount();

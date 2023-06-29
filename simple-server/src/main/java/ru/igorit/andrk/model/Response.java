@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -28,6 +29,7 @@ public class Response {
 
     @NonNull
     @Column(name = "message_id")
+    @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID messageId;
 
     @Column(name = "service_id")

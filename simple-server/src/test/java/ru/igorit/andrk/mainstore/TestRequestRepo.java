@@ -7,6 +7,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.repository.main.RequestRepository;
@@ -22,20 +24,24 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@DirtiesContext
 @TestPropertySource(locations = "/testDataJPA.properties")
 public class TestRequestRepo {
 
 
     @Autowired
     private DataSource dataSource;
-
+    @Autowired
+    private TestEntityManager entityManager;
     @Autowired
     private RequestRepository repo;
     private MainStoreService svc;
 
     @BeforeEach
     private void initService() {
-        svc = new MainStoreServiceJPAImpl(repo, null, null, null);
+        svc = MainStoreServiceJPAImpl.builder()
+                .reqRepo(repo)
+                .build();
     }
 
     private Request makeTestRequest() {
@@ -130,6 +136,27 @@ public class TestRequestRepo {
                         .isNull();
             }
         }
+    }
+
+    @Test
+    @DisplayName("Test Exist by MessageId")
+    public void testExistByMessageId() {
+        var request = makeTestRequest();
+        var msgId1 = request.getMessageId();
+        svc.saveRequest(request);
+        svc.saveRequest(makeTestRequest());
+        request = Request.builder()
+                        .messageId(msgId1)
+                .serviceId(request.getServiceId())
+                .messageDate(request.getMessageDate())
+                .build();
+        assertThat(svc.containRequestWithMessageId(request)).isTrue();
+        svc.saveRequest(request);
+        assertThat(svc.containRequestWithMessageId(request)).isTrue();
+        request = makeTestRequest();
+        assertThat(svc.containRequestWithMessageId(request)).isFalse();
+        svc.saveRequest(request);
+        assertThat(svc.containRequestWithMessageId(request)).isFalse();
     }
 
 }

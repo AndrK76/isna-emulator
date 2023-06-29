@@ -1,21 +1,13 @@
 package ru.igorit.andrk;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import ru.igorit.andrk.config.datasource.MainDatasourceConfiguration;
 import ru.igorit.andrk.config.datasource.MainFlywayConfiguration;
 import ru.igorit.andrk.model.Request;
@@ -55,7 +47,10 @@ public class Test2 {
 
     //@Test
     public void test(){
-        MainStoreService storeSvc= new MainStoreServiceJPAImpl(reqRepo,respRepo,null,null);
+        MainStoreService storeSvc= MainStoreServiceJPAImpl.builder()
+                .reqRepo(reqRepo)
+                .respRepo(respRepo)
+                .build();
         var qq = storeSvc;
         var request = makeTestRequest();
         var request2 = storeSvc.saveRequest(request);
