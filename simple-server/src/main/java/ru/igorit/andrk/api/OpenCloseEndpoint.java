@@ -79,18 +79,18 @@ public class OpenCloseEndpoint {
             throw raiseProcessException(req, "SVC_ERRPROCESS", e.getMessage(), e);
         }
 
-        var resp = createResponse(req,true,res.getStatusCode(),res.getStatusMessage(),res.getData());
+        var resp = createResponse(req, true, res.getStatusCode(), res.getStatusMessage(), res.getData());
         mainStoreService.saveResponse(resp);
 
         var status = new StatusInfo();
         status.setCode(resp.getStatusCode());
-        status.setMessage(resp.getStatusCode());
+        status.setMessage(resp.getStatusMessage());
         var respInfo = new SyncMessageInfoResponse();
 
         respInfo.setMessageId(resp.getMessageId().toString());
         respInfo.setCorrelationId(resp.getCorrelationId().toString());
 
-    respInfo.setResponseDate(toXmlDate(resp.getResponseDate()));
+        respInfo.setResponseDate(toXmlDate(resp.getResponseDate()));
         respInfo.setStatus(status);
         var data = new ResponseData();
         data.setData(res.getDataIgnoreCR());
@@ -109,7 +109,7 @@ public class OpenCloseEndpoint {
     }
 
     private ProcessorException raiseProcessException(ru.igorit.andrk.model.Request request, String errCode, String errMessage, Throwable e) {
-        var resp = createResponse(request,false,errCode,errMessage,null);
+        var resp = createResponse(request, false, errCode, errMessage, null);
         mainStoreService.saveResponse(resp);
 
         ErrorInfo err = new ErrorInfo();

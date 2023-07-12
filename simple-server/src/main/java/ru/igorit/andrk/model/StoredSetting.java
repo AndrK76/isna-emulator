@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +14,8 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @Getter
+@Builder
+@AllArgsConstructor
 @Table(name = "stored_settings")
 public class StoredSetting {
     @EmbeddedId

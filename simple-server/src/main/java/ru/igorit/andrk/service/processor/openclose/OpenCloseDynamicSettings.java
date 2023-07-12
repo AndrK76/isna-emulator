@@ -16,7 +16,7 @@ public class OpenCloseDynamicSettings {
     private boolean checkUniqueReference = false;
     private boolean validateAccountState = false;
     private boolean validateOperationDate = false;
-    private boolean raiseTestError = true;
+    private boolean raiseTestError = false;
 
     public static OpenCloseDynamicSettings create(List<StoredSetting> storedSettings) {
         var ret = new OpenCloseDynamicSettings();
