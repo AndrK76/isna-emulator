@@ -105,6 +105,16 @@ public class MtConfigParser {
         }
     }
 
+    public static NodeList getCustomSection(byte[] configData, String sectionName) {
+        Document cfgDoc = null;
+        try {
+            cfgDoc = getXmlDoc(configData);
+            return cfgDoc.getElementsByTagName(sectionName);
+        } catch (Exception e) {
+            throw new ConfigFormatException(e);
+        }
+    }
+
     private static String clearText(String srcText) {
         return Arrays.stream(srcText.split("\n"))
                 .map(r -> r.replace("\r", "").trim())
@@ -119,16 +129,6 @@ public class MtConfigParser {
             cfgDoc = bld.parse(is);
         }
         return cfgDoc;
-    }
-
-    public static NodeList getCustomSection(byte[] configData, String sectionName) {
-        Document cfgDoc = null;
-        try {
-            cfgDoc = getXmlDoc(configData);
-            return cfgDoc.getElementsByTagName(sectionName);
-        } catch (Exception e) {
-            throw new ConfigFormatException(e);
-        }
     }
 
     private static Optional<MtFormatNodeInfo> parseInputFormatNodeRow(String str) {

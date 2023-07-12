@@ -25,10 +25,10 @@ public class MtParser {
     }
 
     public static MtContent parsePreview(String rawData, MtFormat format) {
-        var content = new MtContent(rawData,format);
+        var content = new MtContent(rawData, format);
         log.debug("parse ");
         log.trace(String.format("on start: %n%s%n", rawData));
-        String clearedData = MtParser.clear(rawData);
+        String clearedData = MtParser.clearMtString(rawData);
         log.trace(String.format("after clear:%n%s%n", clearedData));
         var strings = Arrays.stream(clearedData.split("\n"))
                 .map(s -> s.replace("\r", ""))
@@ -64,35 +64,18 @@ public class MtParser {
         }
     }
 
+    public static String clearMtString(String origText) {
+        List<Character> symbolList = origText.codePoints().mapToObj(c -> (char) c).collect(Collectors.toList());
 
-    private static String clear(String origText) {
-        List<Character> smbRes = new ArrayList<>();
-        String retText = "";
-        char[] symbols = origText.toCharArray();
+        clearSymbolsAtStart(symbolList, new CharPair('{', '-'), false); //remove { | {-
+        Collections.reverse(symbolList);
 
-        //remove { | {-
-        clearAtStart(symbols, smbRes, '{', '-');
+        clearSymbolsAtStart(symbolList, new CharPair('}', '-'), false); //remove } | }-
+        clearSymbolsAtStart(symbolList, new CharPair('\n', '\r'), true); //remove LF | CR
+        clearSymbolsAtStart(symbolList, new CharPair('\n', '\n'), true); //remove LF | LF
 
-        Collections.reverse(smbRes);
-        symbols = getChars(smbRes);
-
-        //remove } | }-
-        clearAtStart(symbols, smbRes, '}', '-');
-        symbols = getChars(smbRes);
-
-        //remove LF | CR
-        while (clearAtStart(symbols, smbRes, '\n', '\r')) {
-            symbols = getChars(smbRes);
-        }
-
-        //remove LF | LF
-        while (clearAtStart(symbols, smbRes, '\n', '\n')) {
-            symbols = getChars(smbRes);
-        }
-
-        Collections.reverse(smbRes);
-        retText = buf2str(smbRes);
-        return retText;
+        Collections.reverse(symbolList);
+        return buf2str(symbolList);
     }
 
     private static int parseDataRow(String str, Map<MtFormatNodeInfo, MtNode> content,
@@ -113,32 +96,54 @@ public class MtParser {
         return curFmtIdx;
     }
 
-    private static char[] getChars(List<Character> smbRes) {
-        char[] symbols;
-        symbols = buf2str(smbRes).toCharArray();
-        return symbols;
+
+    private static class CharPair {
+        private final char requiredFirstSymbol;
+        private final char optionalSecondSymbol;
+
+        private CharPair(char requiredFirstSymbol, char optionalSecondSymbol) {
+            this.requiredFirstSymbol = requiredFirstSymbol;
+            this.optionalSecondSymbol = optionalSecondSymbol;
+        }
     }
 
-    private static boolean clearAtStart(char[] symbols, List<Character> smbRes, char first, char second) {
-        smbRes.clear();
-        boolean cleared = false;
-        boolean inFindFirst = true;
-        boolean inFindSecond = false;
-        for (int i = 0; i < symbols.length; i++) {
-            if (inFindFirst && symbols[i] == first) {
-                inFindSecond = true;
-                cleared = true;
-            } else if (inFindSecond && symbols[i] == second) {
-                inFindSecond = false;
-            } else if (inFindSecond) {
-                inFindSecond = false;
-                smbRes.add(symbols[i]);
+    private enum FindCharMode {
+        IN_FIND_FIRST_SYMBOL,
+        IN_FIND_SECOND_SYMBOL,
+        AFTER_FIND_SYMBOLS;
+    }
+
+    private static boolean clearSymbolsAtStart(List<Character> charArray,
+                                               CharPair symbolsForClear,
+                                               boolean doRecursive) {
+        char[] srcData = buf2str(charArray).toCharArray();
+        FindCharMode findMode = FindCharMode.IN_FIND_FIRST_SYMBOL;
+        charArray.clear();
+        boolean clearIsMake = false;
+        for (int i = 0; i < srcData.length; i++) {
+            if (findMode == FindCharMode.IN_FIND_FIRST_SYMBOL) {
+                if (srcData[i] == symbolsForClear.requiredFirstSymbol) {
+                    findMode = FindCharMode.IN_FIND_SECOND_SYMBOL;
+                    clearIsMake = true;
+                } else {
+                    charArray.add(srcData[i]);
+                    findMode = FindCharMode.AFTER_FIND_SYMBOLS;
+                }
+            } else if (findMode == FindCharMode.IN_FIND_SECOND_SYMBOL) {
+                findMode = FindCharMode.AFTER_FIND_SYMBOLS;
+                if (srcData[i] != symbolsForClear.optionalSecondSymbol) {
+                    charArray.add(srcData[i]);
+                }
             } else {
-                smbRes.add(symbols[i]);
+                charArray.add(srcData[i]);
             }
-            inFindFirst = false;
         }
-        return cleared;
+        if (doRecursive && clearIsMake){
+            return clearSymbolsAtStart(charArray, symbolsForClear, true);
+        } else{
+            return clearIsMake;
+
+        }
     }
 
     private static void processBlockFormat(MtBlock block, MtBlockFormat format, Map<String, MtItem> items) {
@@ -158,7 +163,7 @@ public class MtParser {
                 if (fmtChar != '{') {
                     dataPos++;
                     if (fmtChar != dataChar) {
-                        var errText ="Несоответствие строки "+block.getText()+ " формату "+ format.getFormatString();
+                        var errText = "Несоответствие строки " + block.getText() + " формату " + format.getFormatString();
                         log.error(errText);
                         throw new DataFormatFatalException(errText);
                     }

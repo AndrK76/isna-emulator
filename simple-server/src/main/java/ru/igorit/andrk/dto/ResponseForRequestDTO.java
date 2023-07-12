@@ -13,6 +13,7 @@ import java.util.UUID;
 public class ResponseForRequestDTO {
     private Long id;
     private UUID messageId;
+    private UUID correlationId;
     private String serviceId;
     private Boolean isSuccess;
     private OffsetDateTime responseDate;
@@ -25,6 +26,7 @@ public class ResponseForRequestDTO {
         return new ResponseForRequestDTO(
                 response.getId(),
                 response.getMessageId(),
+                response.getCorrelationId(),
                 response.getServiceId(),
                 response.getIsSuccess(),
                 response.getResponseDate().withNano(0),

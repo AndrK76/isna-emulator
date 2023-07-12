@@ -30,10 +30,12 @@ public class OpenCloseResponse {
     @JoinColumn(name = "request_id")
     private OpenCloseRequest request;
 
+    /*
     @NonNull
     @Column(name = "message_id")
     @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID messageId;
+     */
 
     @NonNull
     private String reference;
@@ -53,7 +55,7 @@ public class OpenCloseResponse {
     public OpenCloseResponse(OpenCloseRequest request){
         this();
         this.request = request;
-        this.messageId = request.getMessageId();
+        //this.messageId = request.getMessageId();
         this.reference = request.getReference();
     }
 

@@ -38,7 +38,8 @@ public class OpenCloseRequestDTO {
         var ret = new OpenCloseRequestDTO();
         ret.id = request.getId();
         ret.rawRequestId = request.getRawRequest().getId();
-        ret.messageId = request.getMessageId();
+        //ret.messageId = request.getMessageId();
+        ret.messageId = request.getRawRequest().getMessageId();
         ret.reference = request.getReference();
         ret.codeForm = request.getCodeForm();
         ret.notifyDate = request.getNotifyDate();

@@ -86,8 +86,11 @@ public class OpenCloseEndpoint {
         status.setCode(resp.getStatusCode());
         status.setMessage(resp.getStatusCode());
         var respInfo = new SyncMessageInfoResponse();
-        respInfo.setMessageId(messageId.toString());
-        respInfo.setResponseDate(toXmlDate(resp.getResponseDate()));
+
+        respInfo.setMessageId(resp.getMessageId().toString());
+        respInfo.setCorrelationId(resp.getCorrelationId().toString());
+
+    respInfo.setResponseDate(toXmlDate(resp.getResponseDate()));
         respInfo.setStatus(status);
         var data = new ResponseData();
         data.setData(res.getDataIgnoreCR());
@@ -95,7 +98,8 @@ public class OpenCloseEndpoint {
         syncResponse.setResponseInfo(respInfo);
         syncResponse.setResponseData(data);
         var response = new SendMessageResponse();
-        response.setResponse(syncResponse);
+        //response.setResponse(syncResponse); //Changed in XSD
+        response.setReturn(syncResponse);
 
         return createResponseJaxbElement(response, SendMessageResponse.class);
     }

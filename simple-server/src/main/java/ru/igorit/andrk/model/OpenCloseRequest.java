@@ -20,11 +20,6 @@ public class OpenCloseRequest implements Comparable<OpenCloseRequest> {
     private Long id;
 
     @NonNull
-    @Column(name = "message_id")
-    @Type(type = "org.hibernate.type.UUIDCharType")
-    private UUID messageId;
-
-    @NonNull
     private String reference;
 
     @NonNull
@@ -45,7 +40,7 @@ public class OpenCloseRequest implements Comparable<OpenCloseRequest> {
     public OpenCloseRequest(Request request) {
         this();
         this.rawRequest = request;
-        this.messageId = request.getMessageId();
+        //this.messageId = request.getMessageId();
     }
     @Override
     public int compareTo(OpenCloseRequest o) {

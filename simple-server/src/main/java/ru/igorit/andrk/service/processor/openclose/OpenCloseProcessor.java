@@ -66,7 +66,8 @@ public class OpenCloseProcessor implements DataProcessor {
         OpenCloseRequest ocRequest;
         Map<Integer, OpenCloseResult> accountResult;
         try {
-            ocRequest = makeRequestEntity(request, inputContent, messageId);
+            //ocRequest = makeRequestEntity(request, inputContent, messageId);
+            ocRequest = makeRequestEntity(request, inputContent);
             accountResult = makeRequestAccounts(ocRequest, inputContent, dynSettings);
         } catch (Exception e) {
             throw processError(e, "SVC_DATAFORMAT_ERROR");
@@ -157,9 +158,10 @@ public class OpenCloseProcessor implements DataProcessor {
         }
     }
 
-    private OpenCloseRequest makeRequestEntity(Request request, MtContent content, UUID messageId) {
+    private OpenCloseRequest makeRequestEntity(Request request, MtContent content) {
+        //private OpenCloseRequest makeRequestEntity(Request request, MtContent content, UUID messageId) {
         var ret = new OpenCloseRequest(request);
-        ret.setMessageId(messageId);
+        //ret.setMessageId(messageId);
         ret.setReference((String) content.getValue("reference"));
         ret.setCodeForm((String) content.getValue("code_form"));
         ret.setNotifyDate((LocalDateTime) content.getValue("notify_date"));
@@ -270,7 +272,7 @@ public class OpenCloseProcessor implements DataProcessor {
             parseRowResult = new OpenCloseResult(results.get("DUPLICATE_MSGID"));
             parseRowResult.setText(
                     parseRowResult.getText().replace("%%{MESSAGE_ID}%%",
-                            request.getMessageId().toString()));
+                            request.getRawRequest().getMessageId().toString()));
         } else if (dynSettings.isCheckUniqueReference() && mainStoreService.containOpenCloseRequestWithReference(request)) {
             parseRowResult = new OpenCloseResult(results.get("DUPLICATE_REFERENCE"));
             parseRowResult.setText(
