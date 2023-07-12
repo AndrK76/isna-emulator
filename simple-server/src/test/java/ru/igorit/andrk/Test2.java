@@ -10,6 +10,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.igorit.andrk.config.datasource.MainDatasourceConfiguration;
 import ru.igorit.andrk.config.datasource.MainFlywayConfiguration;
+import ru.igorit.andrk.mainstore.CommonCreators;
 import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.repository.main.RequestRepository;
 import ru.igorit.andrk.repository.main.ResponseRepository;
@@ -37,13 +38,6 @@ public class Test2 {
     @Autowired
     private ResponseRepository respRepo;
 
-    private Request makeTestRequest() {
-        var requestUUID = UUID.randomUUID();
-        var serviceName = "Test";
-        var requestDate = OffsetDateTime.now();
-        var data = "";
-        return new Request(null, requestUUID, serviceName, requestDate, data);
-    }
 
     //@Test
     public void test(){
@@ -52,7 +46,7 @@ public class Test2 {
                 .respRepo(respRepo)
                 .build();
         var qq = storeSvc;
-        var request = makeTestRequest();
+        var request = CommonCreators.makeMainRequest();
         var request2 = storeSvc.saveRequest(request);
     }
 }

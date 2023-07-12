@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
+import ru.igorit.andrk.mainstore.CommonCreators;
 import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.service.MainStoreService;
 
@@ -17,17 +18,10 @@ class Test2dbConnApplicationTests {
     @Autowired
     private MainStoreService storeSvc;
 
-	private Request makeTestRequest() {
-        var requestUUID = UUID.randomUUID();
-        var serviceName = "Test";
-        var requestDate = OffsetDateTime.now();
-        var data = "";
-        return new Request(null, requestUUID, serviceName, requestDate, data);
-    }
 
     //@Test
     void testThatStoreServiceCorrectSaveRequests() {
-        var request = makeTestRequest();
+        var request = CommonCreators.makeMainRequest();
         var request2 = storeSvc.saveRequest(request);
         System.out.println("");
     }
@@ -35,7 +29,7 @@ class Test2dbConnApplicationTests {
     //@Test
     void testThatStoreServiceCorrectGetPages(){
         for (int i = 0; i < 95; i++) {
-            storeSvc.saveRequest(makeTestRequest());
+            storeSvc.saveRequest(CommonCreators.makeMainRequest());
         }
         Long pos = null;
         for (int i = 0; i < 10; i++) {

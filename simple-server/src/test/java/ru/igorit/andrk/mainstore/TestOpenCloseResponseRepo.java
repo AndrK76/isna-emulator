@@ -59,9 +59,9 @@ public class TestOpenCloseResponseRepo {
     @DisplayName("Save open/close response in storage")
     public void testSaveResponse() {
         int accountCounts = 3;
-        var request = makeMainRequest();
+        var request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
-        var ocReq = makeOCRequest(request, accountCounts);
+        var ocReq = CommonCreators.makeOCRequest(request, accountCounts);
         ocReq = svc.saveOpenCloseRequest(ocReq);
         Long reqId = ocReq.getId();
         var ocResp = makeOCResponse(ocReq);
@@ -90,9 +90,9 @@ public class TestOpenCloseResponseRepo {
     @DisplayName("Load open/close response from storage")
     public void testLoadResponse() {
         int accountCounts = 3;
-        var request = makeMainRequest();
+        var request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
-        var ocReq = makeOCRequest(request, accountCounts);
+        var ocReq = CommonCreators.makeOCRequest(request, accountCounts);
         ocReq = svc.saveOpenCloseRequest(ocReq);
         var ocResp = makeOCResponse(ocReq);
         var ocRespId = svc.saveOpenCloseResponse(ocResp).getId();
@@ -143,7 +143,7 @@ public class TestOpenCloseResponseRepo {
         for (int i = 0; i < dates.length; i++) {
             for (int operType = 1; operType < 3; operType++) {
                 for (int operRes = 0; operRes < operResults.length; operRes++) {
-                    var request = svc.saveRequest(makeMainRequest());
+                    var request = svc.saveRequest(CommonCreators.makeMainRequest());
                     entityManager.detach(request);
                     var ocReq = svc.saveOpenCloseRequest(makeOCRequest(request, dates[i], operType, accountNums));
                     entityManager.detach(ocReq);
@@ -201,27 +201,6 @@ public class TestOpenCloseResponseRepo {
     }
 
 
-    private Request makeMainRequest() {
-        var messageID = UUID.randomUUID();
-        var serviceName = "Test";
-        var requestDate = OffsetDateTime.now();
-        var data = "";
-        return new Request(null, messageID, serviceName, requestDate, data);
-    }
-
-    private OpenCloseRequest makeOCRequest(Request request, int accountCounts) {
-        OpenCloseRequest ocRequest = new OpenCloseRequest(request);
-        ocRequest.setCodeForm("TEST");
-        var accounts = ocRequest.getAccounts();
-        for (int i = 0; i < accountCounts; i++) {
-            var account = new OpenCloseRequestAccount();
-            account.setRequest(ocRequest);
-            account.setSort(i);
-            account.setAccount("QWERTY123456");
-            accounts.add(account);
-        }
-        return ocRequest;
-    }
 
     private OpenCloseRequest makeOCRequest(Request request, LocalDateTime operDate, Integer operType, String[] accountNums) {
         OpenCloseRequest ocRequest = new OpenCloseRequest(request);

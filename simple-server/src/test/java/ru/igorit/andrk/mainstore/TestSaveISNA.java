@@ -55,7 +55,7 @@ public class TestSaveISNA {
     @Test
     @DisplayName("Saving process for valid request for OPEN_CLOSE Service")
     public void testSaveCorrectData() {
-        var request = makeTestRequest();
+        var request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
         entityManager.detach(request);
 
@@ -67,7 +67,7 @@ public class TestSaveISNA {
         ocResponse = svc.saveOpenCloseResponse(ocResponse);
         entityManager.detach(ocResponse);
 
-        var response = makeTestResponse(request, true);
+        var response = CommonCreators.makeMainResponse(request, true);
         response = svc.saveResponse(response);
         entityManager.detach(response);
         entityManager.flush();
@@ -76,30 +76,14 @@ public class TestSaveISNA {
     @Test
     @DisplayName("Saving process for incorrect request OPEN_CLOSE Service")
     public void testSaveInvalidData() {
-        var request = makeTestRequest();
+        var request =CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
         entityManager.detach(request);
 
-        var response = makeTestResponse(request, false);
+        var response = CommonCreators.makeMainResponse(request, false);
         response = svc.saveResponse(response);
         entityManager.detach(response);
         entityManager.flush();
-    }
-
-    private Request makeTestRequest() {
-        var messageID = UUID.randomUUID();
-        var serviceName = "Test";
-        var requestDate = OffsetDateTime.now();
-        var data = "";
-        return new Request(null, messageID, serviceName, requestDate, data);
-    }
-
-    private Response makeTestResponse(Request request, boolean success){
-        var resp = new Response(request);
-        resp.setIsSuccess(success);
-        resp.setStatusMessage("status message");
-        resp.setStatusCode("code");
-        return resp;
     }
 
     private OpenCloseRequest makeOCRequest(Request request, int accountCounts) {

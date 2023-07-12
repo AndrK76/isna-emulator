@@ -56,10 +56,10 @@ public class TestOpenCloseRequestRepo {
     @DisplayName("Save open/close request in storage")
     public void testSaveRequest() {
         int accountCounts = 3;
-        var request = makeMainRequest();
+        var request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
         Long mainId = request.getId();
-        var ocReq = makeOCRequest(request, accountCounts);
+        var ocReq = CommonCreators.makeOCRequest(request, accountCounts);
         ocReq = svc.saveOpenCloseRequest(ocReq);
         assertThat(ocReq.getRawRequest().getId())
                 .withFailMessage("Id owner request %d must me equal %d", ocReq.getRawRequest().getId(), mainId)
@@ -83,9 +83,9 @@ public class TestOpenCloseRequestRepo {
     @DisplayName("Load open/close request from storage")
     public void testLoadRequest() {
         int accountCounts = 3;
-        var request = makeMainRequest();
+        var request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
-        var ocReq = makeOCRequest(request, accountCounts);
+        var ocReq = CommonCreators.makeOCRequest(request, accountCounts);
         ocReq = svc.saveOpenCloseRequest(ocReq);
         Long ocReqId = ocReq.getId();
 
@@ -122,19 +122,18 @@ public class TestOpenCloseRequestRepo {
     @Test
     @DisplayName("Test Exist by Reference")
     public void testExistByReference() {
-        var request = makeMainRequest();
+        var request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
-        var ocRequest = makeOCRequest(request, 3);
+        var ocRequest = CommonCreators.makeOCRequest(request, 3);
         svc.saveOpenCloseRequest(ocRequest);
         var reference = ocRequest.getReference();
-        request = makeMainRequest();
+        request =CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
-        svc.saveOpenCloseRequest(makeOCRequest(request, 4));
-        request = makeMainRequest();
+        svc.saveOpenCloseRequest(CommonCreators.makeOCRequest(request, 4));
+        request = CommonCreators.makeMainRequest();
         request = svc.saveRequest(request);
         ocRequest = OpenCloseRequest.builder()
                 .rawRequest(request)
-                .messageId(ocRequest.getMessageId())
                 .codeForm(ocRequest.getCodeForm())
                 .reference(reference)
                 .notifyDate(ocRequest.getNotifyDate())
@@ -143,40 +142,16 @@ public class TestOpenCloseRequestRepo {
         assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isTrue();
         svc.saveOpenCloseRequest(ocRequest);
         assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isTrue();
-        request = makeMainRequest();
-        ocRequest = makeOCRequest(request, 5);
+        request = CommonCreators.makeMainRequest();
+        ocRequest = CommonCreators.makeOCRequest(request, 5);
         assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isFalse();
         svc.saveOpenCloseRequest(ocRequest);
         assertThat(svc.containOpenCloseRequestWithReference(ocRequest)).isFalse();
     }
 
 
-    private Request makeMainRequest() {
-        var messageID = UUID.randomUUID();
-        var serviceName = "Test";
-        var requestDate = OffsetDateTime.now();
-        var data = "";
-        return new Request(null, messageID, serviceName, requestDate, data);
-    }
 
-    private OpenCloseRequest makeOCRequest(Request request, int accountCounts) {
-        OpenCloseRequest ocRequest = new OpenCloseRequest(request);
-        ocRequest.setCodeForm("TEST");
-        ocRequest.setNotifyDate(LocalDateTime.now());
-        byte[] array = new byte[10];
-        new Random().nextBytes(array);
-        String generatedString = new String(array, StandardCharsets.UTF_8);
-        ocRequest.setReference(generatedString);
-        var accounts = ocRequest.getAccounts();
-        for (int i = 0; i < accountCounts; i++) {
-            var account = new OpenCloseRequestAccount();
-            account.setRequest(ocRequest);
-            account.setSort(i);
-            account.setAccount("QWERTY123456");
-            accounts.add(account);
-        }
-        return ocRequest;
-    }
+
 
 
 }
