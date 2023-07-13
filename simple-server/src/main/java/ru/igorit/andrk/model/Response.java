@@ -1,9 +1,6 @@
 package ru.igorit.andrk.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Type;
 import org.springframework.lang.NonNull;
 
@@ -14,6 +11,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity(name = "responses")
 public class Response {
 

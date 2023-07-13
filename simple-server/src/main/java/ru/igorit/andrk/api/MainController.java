@@ -114,8 +114,6 @@ public class MainController implements ErrorController {
             HttpServletResponse response) throws IOException {
         String serviceName = serviceNames.getOrDefault(configName, null);
         if (serviceName == null) {
-            //response.setHeader("Location", "/error404");
-            //response.setStatus(302);
             response.setStatus(404);
         }
         byte[] data = processorFactory.getProcCfg(serviceName);

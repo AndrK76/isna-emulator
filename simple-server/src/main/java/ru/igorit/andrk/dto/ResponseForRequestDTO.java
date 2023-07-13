@@ -2,14 +2,20 @@ package ru.igorit.andrk.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.extern.jackson.Jacksonized;
 import ru.igorit.andrk.model.Response;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @AllArgsConstructor
+@Builder
+@Jacksonized
 @Getter
+@EqualsAndHashCode(of={"id","messageId","correlationId"})
 public class ResponseForRequestDTO {
     private Long id;
     private UUID messageId;
@@ -21,7 +27,6 @@ public class ResponseForRequestDTO {
     private String statusMessage;
     private String data;
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static ResponseForRequestDTO create(Response response, boolean addData) {
         return new ResponseForRequestDTO(
                 response.getId(),

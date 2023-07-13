@@ -1,9 +1,8 @@
 package ru.igorit.andrk.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.model.Response;
 
@@ -13,8 +12,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@AllArgsConstructor
 @Getter
+@Builder
+@Jacksonized
+@AllArgsConstructor
+@EqualsAndHashCode(of={"id","messageId","response"})
 public class RequestDto {
     private Long id;
 
@@ -29,7 +31,6 @@ public class RequestDto {
 
     private String data;
 
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static RequestDto create(Request request, boolean addData) {
         return new RequestDto(request.getId(), request.getMessageId(), request.getServiceId(),
                 request.getMessageDate().withNano(0),  null, addData? request.getData() : null);

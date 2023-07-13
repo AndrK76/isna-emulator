@@ -121,7 +121,7 @@ public class MtConfigParser {
                 .filter(r -> !r.isEmpty()).collect(Collectors.joining("\n"));
     }
 
-    private static Document getXmlDoc(byte[] configData) throws ParserConfigurationException, IOException, SAXException {
+    public static Document getXmlDoc(byte[] configData) throws ParserConfigurationException, IOException, SAXException {
         Document cfgDoc = null;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder bld = factory.newDocumentBuilder();
