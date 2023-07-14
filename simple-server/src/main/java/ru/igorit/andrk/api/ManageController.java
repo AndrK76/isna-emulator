@@ -98,6 +98,9 @@ public class ManageController {
     public OpenCloseRequestDTO getOpenCloseRequest(
             @PathVariable(name = "id") Long id) {
         OpenCloseRequest request = mainStore.getOpenCloseRequestById(id, true);
+        if (request==null){
+            return null;
+        }
         OpenCloseRequestDTO ret = OpenCloseRequestDTO.create(request, true);
         return ret;
     }
@@ -113,6 +116,9 @@ public class ManageController {
     public OpenCloseResponseForRequestDTO getOpenCloseResponse(
             @PathVariable(name = "id") Long id) {
         OpenCloseResponse response = mainStore.getOpenCloseResponseById(id, true);
+        if (response==null){
+            return null;
+        }
         OpenCloseResponseForRequestDTO ret = OpenCloseResponseForRequestDTO.create(response, true);
         return ret;
     }

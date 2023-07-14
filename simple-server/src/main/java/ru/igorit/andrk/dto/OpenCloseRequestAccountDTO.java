@@ -2,14 +2,18 @@ package ru.igorit.andrk.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 import ru.igorit.andrk.model.OpenCloseRequest;
 import ru.igorit.andrk.model.OpenCloseRequestAccount;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Builder
+@Jacksonized
 @AllArgsConstructor
 @NoArgsConstructor
 public class OpenCloseRequestAccountDTO {
@@ -26,8 +30,6 @@ public class OpenCloseRequestAccountDTO {
     private String bicOld;
     private String accountOld;
     private LocalDateTime dateModify;
-
-    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
     public static OpenCloseRequestAccountDTO create(OpenCloseRequestAccount account){
         var ret = new OpenCloseRequestAccountDTO();
         ret.id = account.getId();

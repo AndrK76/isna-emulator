@@ -1,9 +1,6 @@
 package ru.igorit.andrk.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
@@ -19,6 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity(name = "open_close_responses")
 public class OpenCloseResponse {
 
@@ -29,13 +27,6 @@ public class OpenCloseResponse {
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     @JoinColumn(name = "request_id")
     private OpenCloseRequest request;
-
-    /*
-    @NonNull
-    @Column(name = "message_id")
-    @Type(type = "org.hibernate.type.UUIDCharType")
-    private UUID messageId;
-     */
 
     @NonNull
     private String reference;
@@ -49,7 +40,6 @@ public class OpenCloseResponse {
     private LocalDateTime notifyDate;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "response", cascade = CascadeType.ALL)
-    //@Fetch(FetchMode.SUBSELECT)
     private List<OpenCloseResponseAccount> accounts = new ArrayList<>();
 
     public OpenCloseResponse(OpenCloseRequest request){

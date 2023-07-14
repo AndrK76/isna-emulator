@@ -1,9 +1,6 @@
 package ru.igorit.andrk.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -13,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
+@Builder
 @Entity
 @Table(name = "open_close_response_accounts")
 public class OpenCloseResponseAccount {
