@@ -141,7 +141,8 @@
             <xs:documentation>Структура для передачи бизнес данных сообщения</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element minOccurs="1" name="data" type="xs:anyType">
+            <!--<xs:element minOccurs="1" name="data" type="xs:anyType">-->
+            <xs:element minOccurs="1" name="data" type="RequestDataData">
                 <xs:annotation>
                     <xs:documentation>Объект бизнес данные сообщения (формат определяется системой получателя
                         сообщения)
@@ -150,6 +151,10 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:simpleType name="RequestDataData">
+        <xs:restriction base="xs:string"></xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="SyncSendMessageResponse">
         <xsd:annotation>
