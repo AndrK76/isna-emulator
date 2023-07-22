@@ -1,4 +1,0 @@
-rootProject.name = 'isna-emulator'
-include 'simple-server'
-include 'sync-channel-soap'
-
