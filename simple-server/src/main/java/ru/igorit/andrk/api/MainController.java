@@ -123,4 +123,9 @@ public class MainController implements ErrorController {
         dataStream.transferTo(response.getOutputStream());
         response.flushBuffer();
     }
+
+    @GetMapping("/api")
+    public String swagger(Model model) {
+        return "api";
+    }
 }

@@ -32,6 +32,11 @@ spring:
 api:
   doc_per_page: 10
 
+springdoc:
+  api-docs:
+    path: "/swagger-ui"
+
+
 logging:
   level:
     root: INFO

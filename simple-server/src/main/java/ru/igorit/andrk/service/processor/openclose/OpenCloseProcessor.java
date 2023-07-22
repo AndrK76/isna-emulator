@@ -79,7 +79,7 @@ public class OpenCloseProcessor implements DataProcessor {
             OpenCloseResponse ocResponse;
             try {
                 outputContent = new MtContent(outputFormat);
-                ocResponse = makeResponse(outputContent, outputFormat, ocRequest, accountResult);
+                ocResponse = makeResponse(outputContent, outputFormat, ocRequest, accountResult, dynSettings);
             } catch (Exception e) {
                 throw processError(e, "SVC_DATACOMPOSE_ERROR");
             }
@@ -407,7 +407,8 @@ public class OpenCloseProcessor implements DataProcessor {
     private OpenCloseResponse makeResponse(MtContent content,
                                            MtFormat format,
                                            OpenCloseRequest data,
-                                           Map<Integer, OpenCloseResult> processResult) {
+                                           Map<Integer, OpenCloseResult> processResult,
+                                           OpenCloseDynamicSettings dynSettings) {
         OpenCloseResponse ret = new OpenCloseResponse(data);
 
         String[] constantNodeNames = new String[]{"HEAD", "ID", "MT_FORM", "SUBJECT"};
@@ -422,7 +423,10 @@ public class OpenCloseProcessor implements DataProcessor {
         String respCodeForm = data.getCodeForm().equals("A01") ? "A1C" : "A3C";
 
         var idBlock = content.getNode("ID").getBlocks().get(0);
-        idBlock.setItem(format.getItem("reference"), data.getReference());
+        idBlock.setItem(format.getItem("reference"),
+                dynSettings.isUseFixReference() && !dynSettings.getFixReference().isEmpty()
+                        ? dynSettings.getFixReference()
+                        : data.getReference());
 
         var subjBlock = content.getNode("SUBJECT").getBlocks().get(0);
         ret.setCodeForm(respCodeForm);

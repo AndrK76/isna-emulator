@@ -18,6 +18,10 @@ public class OpenCloseDynamicSettings {
     private boolean validateOperationDate = false;
     private boolean raiseTestError = false;
 
+    private boolean useFixReference = false;
+
+    private String fixReference = "";
+
     public static OpenCloseDynamicSettings create(List<StoredSetting> storedSettings) {
         var ret = new OpenCloseDynamicSettings();
         var stored = storedSettings.stream()
@@ -28,10 +32,16 @@ public class OpenCloseDynamicSettings {
         ret.validateAccountState = getStoredBool(stored, "ValidateAccountState", ret.validateAccountState);
         ret.validateOperationDate = getStoredBool(stored, "ValidateOperationDate", ret.validateOperationDate);
         ret.raiseTestError = getStoredBool(stored, "RaiseTestError", ret.raiseTestError);
+        ret.useFixReference = getStoredBool(stored, "UseFixReference", ret.useFixReference);
+        ret.fixReference = getStoredString(stored, "FixReference", ret.fixReference);
         return ret;
     }
 
     private static boolean getStoredBool(Map<String, Object> values, String propertyName, boolean defaultValue) {
         return (Boolean) values.getOrDefault(propertyName, defaultValue);
+    }
+
+    private static String getStoredString(Map<String, Object> values, String propertyName, String defaultValue) {
+        return (String) values.getOrDefault(propertyName, defaultValue);
     }
 }

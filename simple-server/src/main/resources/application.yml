@@ -27,6 +27,10 @@ spring:
 api:
   doc_per_page: 10
 
+springdoc:
+  api-docs:
+    path: "/swagger-ui"
+
 logging:
   level:
     root: warn
@@ -34,3 +38,4 @@ logging:
     org.springframework.boot.web.embedded.tomcat: info
     org.flywaydb.core.internal.license: fatal
     org.flywaydb.core.internal.database: info
+

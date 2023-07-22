@@ -26,6 +26,10 @@ dependencies {
     implementation project(':sync-channel-soap')
     runtimeOnly 'org.glassfish.jaxb:jaxb-runtime'
 
+    //implementation 'io.springfox:springfox-boot-starter'
+    //implementation 'io.springfox:springfox-swagger-ui'
+    implementation 'org.springdoc:springdoc-openapi-ui'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'com.h2database:h2'

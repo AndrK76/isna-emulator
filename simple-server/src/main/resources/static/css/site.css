@@ -14,3 +14,7 @@ body {
     min-height: 15rem;
     padding-top: 4.5rem;
 }
+
+.vh-90 {
+    height: 90vh !important;
+}
