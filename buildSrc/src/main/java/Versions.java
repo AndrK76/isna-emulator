@@ -7,4 +7,7 @@ public interface Versions {
     String bootstrap = "5.2.3";
     String bootstrap_npm = "5.3.0-alpha3";
     String jquery = "3.6.4";
+
+    String springFox = "3.0.0";
+    String springDocOpenApi = "1.7.0";
 }

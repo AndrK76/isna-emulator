@@ -44,21 +44,13 @@ public class TestRequestRepo {
                 .build();
     }
 
-    private Request makeTestRequest() {
-        var messageID = UUID.randomUUID();
-        var serviceName = "Test";
-        var requestDate = OffsetDateTime.now();
-        var data = "";
-        return new Request(null, messageID, serviceName, requestDate, data);
-    }
-
     @Test
     @DisplayName("Save Request in storage")
     public void testSaveRequest() {
         var couInRepo = repo.findAll().size();
         assertThat(couInRepo).withFailMessage("Request table must be Empty before test")
                 .isEqualTo(0);
-        var request = makeTestRequest();
+        var request = CommonCreators.makeMainRequest();
         var oldMessageId = UUID.fromString(request.getMessageId().toString());
         request = svc.saveRequest(request);
         assertThat(request.getMessageId()).withFailMessage("Message Id after save must be not change")
@@ -77,7 +69,7 @@ public class TestRequestRepo {
         assertThat(couInRepo).withFailMessage("Request table must be Empty before test")
                 .isEqualTo(0);
         for (int i = 0; i < totalSize; i++) {
-            svc.saveRequest(makeTestRequest());
+            svc.saveRequest(CommonCreators.makeMainRequest());
         }
         couInRepo = repo.findAll().size();
         assertThat(couInRepo)
@@ -104,7 +96,7 @@ public class TestRequestRepo {
                 lastPartitionSize = actualPartitionSize;
             }
         }
-        svc.saveRequest(makeTestRequest());
+        svc.saveRequest(CommonCreators.makeMainRequest());
         var page = svc.getRequests(prevPos, partitionSize);
         var actualPartitionSize = page.getContent().size();
         assertThat(actualPartitionSize)
@@ -121,7 +113,7 @@ public class TestRequestRepo {
         int offset = 1;
         Map<Integer, Long> idValues = new HashMap<>();
         for (int i = 0; i < sampleSize; i++) {
-            idValues.put(i, svc.saveRequest(makeTestRequest()).getId());
+            idValues.put(i, svc.saveRequest(CommonCreators.makeMainRequest()).getId());
         }
         for (int i = 0; i < sampleSize; i++) {
             var dlt = sampleSize - offset;
@@ -141,10 +133,10 @@ public class TestRequestRepo {
     @Test
     @DisplayName("Test Exist by MessageId")
     public void testExistByMessageId() {
-        var request = makeTestRequest();
+        var request = CommonCreators.makeMainRequest();
         var msgId1 = request.getMessageId();
         svc.saveRequest(request);
-        svc.saveRequest(makeTestRequest());
+        svc.saveRequest(CommonCreators.makeMainRequest());
         request = Request.builder()
                         .messageId(msgId1)
                 .serviceId(request.getServiceId())
@@ -153,7 +145,7 @@ public class TestRequestRepo {
         assertThat(svc.containRequestWithMessageId(request)).isTrue();
         svc.saveRequest(request);
         assertThat(svc.containRequestWithMessageId(request)).isTrue();
-        request = makeTestRequest();
+        request = CommonCreators.makeMainRequest();
         assertThat(svc.containRequestWithMessageId(request)).isFalse();
         svc.saveRequest(request);
         assertThat(svc.containRequestWithMessageId(request)).isFalse();

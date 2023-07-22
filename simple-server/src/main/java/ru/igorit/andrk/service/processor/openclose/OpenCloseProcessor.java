@@ -41,52 +41,61 @@ public class OpenCloseProcessor implements DataProcessor {
 
     @Override
     public ProcessResult process(Request request, UUID messageId) {
-        OpenCloseDynamicSettings dynSettings = OpenCloseDynamicSettings.create(mainStoreService.getSettingsByGroup(this.document()));
-
-        String data = request.getData();
-        MtContent inputContent, outputContent;
-        if (inputFormat.getNodes().size() == 0) {
-            throw processError(new ConfigFormatException("Пустая конфигурация сервиса"), "SVC_CONFIG_ERROR");
-        }
-
         try {
-            inputContent = MtParser.parsePreview(data, inputFormat);
-            validateContentOnFatalErrors(inputContent);
 
-            var codeForm = (String) inputContent.getValue("code_form");
-            if (codeForm.equals("A03")) {
-                inputContent.getNode("ACCOUNT").setCurrentCode("ACCOUNT_CHANGE");
+            OpenCloseDynamicSettings dynSettings = OpenCloseDynamicSettings.create(mainStoreService.getSettingsByGroup(this.document()));
+
+            String data = request.getData();
+            MtContent inputContent, outputContent;
+            if (inputFormat.getNodes().size() == 0) {
+                throw processError(new ConfigFormatException("Пустая конфигурация сервиса"), "SVC_CONFIG_ERROR");
             }
-            MtParser.parseFinal(inputContent, inputFormat);
-            log.debug(inputContent.dumpValues());
-        } catch (DataFormatFatalException e) {
-            throw processError(e, "SVC_DATAFORMAT_ERROR");
+
+            try {
+                inputContent = MtParser.parsePreview(data, inputFormat);
+                validateContentOnFatalErrors(inputContent);
+
+                var codeForm = (String) inputContent.getValue("code_form");
+                if (codeForm.equals("A03")) {
+                    inputContent.getNode("ACCOUNT").setCurrentCode("ACCOUNT_CHANGE");
+                }
+                MtParser.parseFinal(inputContent, inputFormat);
+                log.debug(inputContent.dumpValues());
+            } catch (DataFormatFatalException e) {
+                throw processError(e, "SVC_DATAFORMAT_ERROR");
+            }
+
+            OpenCloseRequest ocRequest;
+            Map<Integer, OpenCloseResult> accountResult;
+            try {
+                ocRequest = makeRequestEntity(request, inputContent);
+                accountResult = makeRequestAccounts(ocRequest, inputContent, dynSettings);
+            } catch (Exception e) {
+                throw processError(e, "SVC_DATAFORMAT_ERROR");
+            }
+            ocRequest = mainStoreService.saveOpenCloseRequest(ocRequest);
+
+
+            OpenCloseResponse ocResponse;
+            try {
+                outputContent = new MtContent(outputFormat);
+                ocResponse = makeResponse(outputContent, outputFormat, ocRequest, accountResult, dynSettings);
+            } catch (Exception e) {
+                throw processError(e, "SVC_DATACOMPOSE_ERROR");
+            }
+            mainStoreService.saveOpenCloseResponse(ocResponse);
+
+            var successResult = ProcessResult.successResult();
+            successResult.setData(outputContent.getRawData());
+
+            return successResult;
+        } catch (ProcessorException e) {
+            if (e.getErrorInfo().getErrorCode().equals("SVC_DATAFORMAT_ERROR")) {
+                return ProcessResult.errorResult();
+            } else {
+                throw e;
+            }
         }
-
-        OpenCloseRequest ocRequest;
-        Map<Integer, OpenCloseResult> accountResult;
-        try {
-            ocRequest = makeRequestEntity(request, inputContent, messageId);
-            accountResult = makeRequestAccounts(ocRequest, inputContent, dynSettings);
-        } catch (Exception e) {
-            throw processError(e, "SVC_DATAFORMAT_ERROR");
-        }
-        ocRequest = mainStoreService.saveOpenCloseRequest(ocRequest);
-
-
-        OpenCloseResponse ocResponse;
-        try {
-            outputContent = new MtContent(outputFormat);
-            ocResponse = makeResponse(outputContent, outputFormat, ocRequest, accountResult);
-        } catch (Exception e) {
-            throw processError(e, "SVC_DATACOMPOSE_ERROR");
-        }
-        mainStoreService.saveOpenCloseResponse(ocResponse);
-
-        var successResult = ProcessResult.successResult();
-        successResult.setData(outputContent.getRawData());
-
-        return successResult;
     }
 
     @Override
@@ -100,7 +109,7 @@ public class OpenCloseProcessor implements DataProcessor {
         log.trace("Results: {}", results);
     }
 
-    private Map<String, OpenCloseResult> initResultValues(byte[] config) {
+    public Map<String, OpenCloseResult> initResultValues(byte[] config) {
         Map<String, OpenCloseResult> resList = new HashMap<>();
         NodeList resCfg = MtConfigParser.getCustomSection(config, "results");
         if (resCfg.getLength() != 0) {
@@ -157,9 +166,8 @@ public class OpenCloseProcessor implements DataProcessor {
         }
     }
 
-    private OpenCloseRequest makeRequestEntity(Request request, MtContent content, UUID messageId) {
+    private OpenCloseRequest makeRequestEntity(Request request, MtContent content) {
         var ret = new OpenCloseRequest(request);
-        ret.setMessageId(messageId);
         ret.setReference((String) content.getValue("reference"));
         ret.setCodeForm((String) content.getValue("code_form"));
         ret.setNotifyDate((LocalDateTime) content.getValue("notify_date"));
@@ -270,7 +278,7 @@ public class OpenCloseProcessor implements DataProcessor {
             parseRowResult = new OpenCloseResult(results.get("DUPLICATE_MSGID"));
             parseRowResult.setText(
                     parseRowResult.getText().replace("%%{MESSAGE_ID}%%",
-                            request.getMessageId().toString()));
+                            request.getRawRequest().getMessageId().toString()));
         } else if (dynSettings.isCheckUniqueReference() && mainStoreService.containOpenCloseRequestWithReference(request)) {
             parseRowResult = new OpenCloseResult(results.get("DUPLICATE_REFERENCE"));
             parseRowResult.setText(
@@ -399,7 +407,8 @@ public class OpenCloseProcessor implements DataProcessor {
     private OpenCloseResponse makeResponse(MtContent content,
                                            MtFormat format,
                                            OpenCloseRequest data,
-                                           Map<Integer, OpenCloseResult> processResult) {
+                                           Map<Integer, OpenCloseResult> processResult,
+                                           OpenCloseDynamicSettings dynSettings) {
         OpenCloseResponse ret = new OpenCloseResponse(data);
 
         String[] constantNodeNames = new String[]{"HEAD", "ID", "MT_FORM", "SUBJECT"};
@@ -407,14 +416,17 @@ public class OpenCloseProcessor implements DataProcessor {
             var node = content.getNode(nodeName, MtContent.FindNodeType.ByOrigCode);
             var block = new MtBlock(
                     0,
-                    getOutBlockFormatString(nodeName, format),
+                    format.getOutBlockFormatString(nodeName),
                     node);
             node.getBlocks().add(block);
         });
         String respCodeForm = data.getCodeForm().equals("A01") ? "A1C" : "A3C";
 
         var idBlock = content.getNode("ID").getBlocks().get(0);
-        idBlock.setItem(format.getItem("reference"), data.getReference());
+        idBlock.setItem(format.getItem("reference"),
+                dynSettings.isUseFixReference() && !dynSettings.getFixReference().isEmpty()
+                        ? dynSettings.getFixReference()
+                        : data.getReference());
 
         var subjBlock = content.getNode("SUBJECT").getBlocks().get(0);
         ret.setCodeForm(respCodeForm);
@@ -433,9 +445,9 @@ public class OpenCloseProcessor implements DataProcessor {
             var retAcc = new OpenCloseResponseAccount(ret, account);
             var accBlock = new MtBlock(
                     account.getSort(),
-                    getOutBlockFormatString(accNode.getCurrentCode(), format),
+                    format.getOutBlockFormatString(accNode.getCurrentCode()),
                     accNode);
-            accBlock.setBlockFormat(getOutBlockFormat(accNode.getCurrentCode(), format));
+            accBlock.setBlockFormat(format.getOutBlockFormat(accNode.getCurrentCode()));
 
             accNode.getBlocks().add(accBlock);
             accBlock.setItem(format.getItem("bic"), retAcc.getBic());
@@ -462,15 +474,5 @@ public class OpenCloseProcessor implements DataProcessor {
 
         return ret;
     }
-
-    private String getOutBlockFormatString(String nodeName, MtFormat format) {
-        return format.getDetailFormats().get(nodeName).getSplitter() + "~"
-                + format.getDetailFormats().get(nodeName).getFormatString();
-    }
-
-    private MtBlockFormat getOutBlockFormat(String nodeName, MtFormat format) {
-        return format.getDetailFormats().get(nodeName);
-    }
-
 
 }

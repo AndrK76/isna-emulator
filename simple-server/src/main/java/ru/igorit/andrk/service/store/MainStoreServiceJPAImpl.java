@@ -13,6 +13,7 @@ import ru.igorit.andrk.service.MainStoreService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Builder
@@ -136,12 +137,22 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
 
     @Override
     public Page<OpenCloseRequest> getOpenCloseRequests(Long lastId, int count) {
+        Page<OpenCloseRequest> ret = null;
         Pageable condition = makePageCondition(count, true);
         if (lastId == null) {
-            return ocReqRepo.findAll(condition);
+            ret = ocReqRepo.findAll(condition);
         } else {
-            return ocReqRepo.findAllByIdLessThan(lastId, condition);
+            ret = ocReqRepo.findAllByIdLessThan(lastId, condition);
         }
+        if (ret.getContent().size() > 0) {
+            var highId = ret.getContent().get(0).getRawRequest().getId();
+            var lowerId = ret.getContent().get(ret.getContent().size() - 1).getId();
+            var requests = reqRepo.findAllByIdBetween(lowerId, highId)
+                    .stream().collect(Collectors.toMap(k -> k.getId(), v -> v));
+            ret.getContent().forEach(r -> r.setRawRequest(requests.get(r.getRawRequest().getId())));
+            System.out.println();
+        }
+        return ret;
     }
 
     @Override
@@ -162,6 +173,7 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             return null;
         }
         var ret = ocReqRepo.findById(id).orElse(null);
+        var msgId = ret.getRawRequest().getMessageId();
         if (loadAccounts) {
             var cou = ret.getAccounts().size();
         }

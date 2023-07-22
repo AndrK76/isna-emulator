@@ -11,7 +11,7 @@ import java.util.GregorianCalendar;
 public class DataHandler {
     public static XMLGregorianCalendar toXmlDate(LocalDateTime date) {
         GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(Timestamp.valueOf(LocalDateTime.now()));
+        calendar.setTime(Timestamp.valueOf(date));
         try {
             XMLGregorianCalendar result = DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
             return result;

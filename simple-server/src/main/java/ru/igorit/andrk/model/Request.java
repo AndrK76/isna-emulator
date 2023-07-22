@@ -29,6 +29,10 @@ public class Request implements Comparable<Request>{
     @Type(type = "org.hibernate.type.UUIDCharType")
     private UUID messageId;
 
+    @Column(name = "correlation_id")
+    @Type(type = "org.hibernate.type.UUIDCharType")
+    private UUID correlationId;
+
     @Column(name = "service_id")
     private String serviceId;
 

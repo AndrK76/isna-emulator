@@ -5,6 +5,7 @@ function showHideRequest(id, onlyHide) {
             testEl.hide();
         }
     } else {
+        saveScrollPos();
         showHideResponse(id, null, true)
         if (!testEl.length) {
             $.get(apiUrl + '/request/' + id + '/data', function (data) {
@@ -12,6 +13,7 @@ function showHideRequest(id, onlyHide) {
             });
         } else {
             testEl.toggle();
+            restoreScrollPos();
         }
     }
 }
@@ -23,6 +25,7 @@ function showHideResponse(requestId, responseId, onlyHide) {
             testEl.hide();
         }
     } else {
+        saveScrollPos();
         showHideRequest(requestId, true);
         if (!testEl.length) {
             $.get(apiUrl + '/response/' + responseId + '/data', function (data) {
@@ -30,6 +33,7 @@ function showHideResponse(requestId, responseId, onlyHide) {
             });
         } else {
             testEl.toggle();
+            restoreScrollPos();
         }
     }
 }
@@ -73,4 +77,5 @@ function getData(fromIdx) {
 function addRowBelow(prefix, title, id, data) {
     let content = '<tr id="' + prefix + id + '"><td colspan = "5">' + title + ':<pre>' + data + '</pre></td></tr>';
     $('#row_' + id).after(content);
+    restoreScrollPos();
 }

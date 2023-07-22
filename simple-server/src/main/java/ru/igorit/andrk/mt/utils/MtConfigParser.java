@@ -105,22 +105,6 @@ public class MtConfigParser {
         }
     }
 
-    private static String clearText(String srcText) {
-        return Arrays.stream(srcText.split("\n"))
-                .map(r -> r.replace("\r", "").trim())
-                .filter(r -> !r.isEmpty()).collect(Collectors.joining("\n"));
-    }
-
-    private static Document getXmlDoc(byte[] configData) throws ParserConfigurationException, IOException, SAXException {
-        Document cfgDoc = null;
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder bld = factory.newDocumentBuilder();
-        try (InputStream is = new ByteArrayInputStream(configData)) {
-            cfgDoc = bld.parse(is);
-        }
-        return cfgDoc;
-    }
-
     public static NodeList getCustomSection(byte[] configData, String sectionName) {
         Document cfgDoc = null;
         try {
@@ -129,6 +113,22 @@ public class MtConfigParser {
         } catch (Exception e) {
             throw new ConfigFormatException(e);
         }
+    }
+
+    private static String clearText(String srcText) {
+        return Arrays.stream(srcText.split("\n"))
+                .map(r -> r.replace("\r", "").trim())
+                .filter(r -> !r.isEmpty()).collect(Collectors.joining("\n"));
+    }
+
+    public static Document getXmlDoc(byte[] configData) throws ParserConfigurationException, IOException, SAXException {
+        Document cfgDoc = null;
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder bld = factory.newDocumentBuilder();
+        try (InputStream is = new ByteArrayInputStream(configData)) {
+            cfgDoc = bld.parse(is);
+        }
+        return cfgDoc;
     }
 
     private static Optional<MtFormatNodeInfo> parseInputFormatNodeRow(String str) {

@@ -2,8 +2,10 @@ package ru.igorit.andrk.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 import ru.igorit.andrk.model.OpenCloseResponseAccount;
 
 import java.time.LocalDateTime;
@@ -11,6 +13,8 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Jacksonized
 public class OpenCloseResponseAccountDTO {
     private Long id;
     private Integer sort;

@@ -1,5 +1,6 @@
 package ru.igorit.andrk.api;
 
+import io.swagger.v3.oas.annotations.Operation;
 import org.apache.catalina.Store;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ public class ManageController {
         this.docPerPage = docPerPage;
     }
 
+    @Operation(summary = "All requests")
     @GetMapping("/request")
     public Page<RequestDto> getRequests(
             @RequestParam(required = false) Long after,
@@ -98,6 +100,9 @@ public class ManageController {
     public OpenCloseRequestDTO getOpenCloseRequest(
             @PathVariable(name = "id") Long id) {
         OpenCloseRequest request = mainStore.getOpenCloseRequestById(id, true);
+        if (request == null) {
+            return null;
+        }
         OpenCloseRequestDTO ret = OpenCloseRequestDTO.create(request, true);
         return ret;
     }
@@ -113,6 +118,9 @@ public class ManageController {
     public OpenCloseResponseForRequestDTO getOpenCloseResponse(
             @PathVariable(name = "id") Long id) {
         OpenCloseResponse response = mainStore.getOpenCloseResponseById(id, true);
+        if (response == null) {
+            return null;
+        }
         OpenCloseResponseForRequestDTO ret = OpenCloseResponseForRequestDTO.create(response, true);
         return ret;
     }
@@ -130,10 +138,22 @@ public class ManageController {
             @PathVariable(name = "setting") String setting) {
         StoredSettingKey key = new StoredSettingKey(serviceName, setting);
         var storedSetting = mainStore.getSetting(key);
-        if (storedSetting==null){
+        if (storedSetting == null) {
             return null;
         }
         return storedSetting.getValue();
+    }
+
+    @GetMapping("/setting/{service}/{setting}/exact")
+    public StoredSettingDTO getSettingForServiceWithType(
+            @PathVariable(name = "service") String serviceName,
+            @PathVariable(name = "setting") String setting) {
+        StoredSettingKey key = new StoredSettingKey(serviceName, setting);
+        var storedSetting = mainStore.getSetting(key);
+        if (storedSetting == null) {
+            return null;
+        }
+        return new StoredSettingDTO(storedSetting);
     }
 
     @PostMapping("/setting/{service}/{setting}")
@@ -147,6 +167,20 @@ public class ManageController {
                 .orElse(new StoredSetting(key, value));
         storedSetting.setValue(value);
         return mainStore.saveSetting(storedSetting).getValue();
+    }
+
+    @PostMapping("/setting/{service}/{setting}/exact")
+    public StoredSettingDTO setSettingForServiceWithType(
+            @PathVariable(name = "service") String serviceName,
+            @PathVariable(name = "setting") String setting,
+            @RequestBody StoredSettingDTO value) {
+        value.actualizeValue();
+        StoredSettingKey key = new StoredSettingKey(serviceName, setting);
+        var storedSetting = Optional
+                .ofNullable(mainStore.getSetting(key))
+                .orElse(new StoredSetting(key,value.getValue()));
+        storedSetting.setValue(value.getValue(), value.getValueType());
+        return new StoredSettingDTO(mainStore.saveSetting(storedSetting));
     }
 
 }

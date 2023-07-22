@@ -1,9 +1,8 @@
 package ru.igorit.andrk.dto;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.extern.jackson.Jacksonized;
 import ru.igorit.andrk.model.OpenCloseRequestAccount;
 import ru.igorit.andrk.model.OpenCloseResponse;
 import ru.igorit.andrk.model.OpenCloseResponseAccount;
@@ -16,6 +15,9 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
+@Jacksonized
+@EqualsAndHashCode(of = {"id"})
 public class OpenCloseResponseForRequestDTO {
 
     private Long id;

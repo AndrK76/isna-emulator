@@ -19,6 +19,16 @@ public class MtFormat {
         return items.get(code);
     }
 
+    public String getOutBlockFormatString(String nodeName) {
+        return this.getDetailFormats().get(nodeName).getSplitter() + "~"
+                + this.getDetailFormats().get(nodeName).getFormatString();
+    }
+
+    public MtBlockFormat getOutBlockFormat(String nodeName) {
+        return this.getDetailFormats().get(nodeName);
+    }
+
+
     @Override
     public String toString() {
         return "MtFormat{" +

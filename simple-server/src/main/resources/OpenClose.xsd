@@ -15,7 +15,7 @@
     <xsd:element name="SendMessageResponse">
         <xs:complexType>
             <xs:sequence>
-                <xs:element minOccurs="1" name="response" type="SyncSendMessageResponse">
+                <xs:element minOccurs="1" name="return" type="SyncSendMessageResponse">
                     <xs:annotation>
                         <xsd:documentation>Объект ответа</xsd:documentation>
                     </xs:annotation>
@@ -46,6 +46,15 @@
     <xs:complexType name="RequestInfo">
         <xs:sequence>
             <xs:element minOccurs="0" name="messageId" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Идентификатор сообщения.
+                        Идентификатор сообщения генерируется ШЭП. Поэтому в случает отправки сообщения на ШЭП данное
+                        поле должно быть пустым. В случае когда сообщение передается получателю номер будет проставлен
+                        ШЭП.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element minOccurs="0" name="correlationId" type="xs:string">
                 <xs:annotation>
                     <xs:documentation>Идентификатор сообщения.
                         Идентификатор сообщения генерируется ШЭП. Поэтому в случает отправки сообщения на ШЭП данное
@@ -132,7 +141,8 @@
             <xs:documentation>Структура для передачи бизнес данных сообщения</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-            <xs:element minOccurs="1" name="data" type="xs:anyType">
+            <!--<xs:element minOccurs="1" name="data" type="xs:anyType">-->
+            <xs:element minOccurs="1" name="data" type="RequestDataData">
                 <xs:annotation>
                     <xs:documentation>Объект бизнес данные сообщения (формат определяется системой получателя
                         сообщения)
@@ -141,6 +151,10 @@
             </xs:element>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:simpleType name="RequestDataData">
+        <xs:restriction base="xs:string"></xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="SyncSendMessageResponse">
         <xsd:annotation>

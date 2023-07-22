@@ -26,9 +26,24 @@ function enableButton(button, enable) {
     button.attr('disabled', !enable);
     if (enable) {
         button.removeClass('btn-light');
-        button.addClass('btn-dark');
+        button.addClass('btn-secondary');
     } else {
-        button.removeClass('btn-dark');
+        button.removeClass('btn-secondary');
         button.addClass('btn-light');
     }
+}
+
+let scrollPos = 0;
+
+function saveScrollPos(){
+    scrollPos = $(window).scrollTop();
+}
+
+function restoreScrollPos(){
+    $('html, body').animate({
+        scrollTop: scrollPos
+    }, 0);
+    $('html, body').animate({
+        scrollTop: scrollPos
+    }, 500);
 }

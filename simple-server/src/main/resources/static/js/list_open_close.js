@@ -39,6 +39,7 @@ function showHideSrcRequest(idRow, idRequest, onlyHide) {
             testEl.hide();
         }
     } else {
+        saveScrollPos();
         showHideRequestAccounts(idRow, true);
         showHideResponseAccounts(idRow, null, true);
         if (!testEl.length) {
@@ -51,15 +52,18 @@ function showHideSrcRequest(idRow, idRequest, onlyHide) {
                 content += '<tr><th>Сервис</th><td>' + data.serviceId + '</td></tr>';
                 if (data.response != null) {
                     content += '<tr><th>Статус ответа</th><td>' + data.response.statusCode + '</td>';
-                    content += '<td rowspan="3"><pre>' + data.response.data + '</pre></td></tr>';
+                    content += '<td rowspan="4"><pre>' + data.response.data + '</pre></td></tr>';
+                    content += '<tr><th>Id ответа</th><td>' + data.response.messageId + '</td></tr>';
                     content += '<tr><th>Текст статуса</th><td>' + data.response.statusMessage + '</td></tr>';
                     content += '<tr><th>Дата ответа</th><td>' + data.response.responseDate.replace('T', ' ').replace('+', ' +') + '</td></tr>';
                 }
                 content += '</table></td></tr>'
                 $('#row_' + idRow).after(content);
+                restoreScrollPos();
             });
         } else {
             testEl.toggle();
+            restoreScrollPos();
         }
     }
 }
@@ -71,6 +75,7 @@ function showHideRequestAccounts(idRequest, onlyHide) {
             testEl.hide();
         }
     } else {
+        saveScrollPos();
         showHideSrcRequest(idRequest, null, true);
         showHideResponseAccounts(idRequest, null, true);
         if (!testEl.length) {
@@ -107,9 +112,11 @@ function showHideRequestAccounts(idRequest, onlyHide) {
                 }
                 content += '</tbody></table></td></tr>'
                 $('#row_' + idRequest).after(content);
+                restoreScrollPos();
             });
         } else {
             testEl.toggle();
+            restoreScrollPos();
         }
     }
 }
@@ -121,6 +128,7 @@ function showHideResponseAccounts(idRequest, idResponse, onlyHide) {
             testEl.hide();
         }
     } else {
+        saveScrollPos();
         showHideSrcRequest(idRequest, null, true);
         showHideRequestAccounts(idRequest, true);
         if (!testEl.length) {
@@ -159,9 +167,11 @@ function showHideResponseAccounts(idRequest, idResponse, onlyHide) {
                 }
                 content += '</tbody></table></td></tr>'
                 $('#row_' + idRequest).after(content);
+                restoreScrollPos();
             });
         } else {
             testEl.toggle();
+            restoreScrollPos();
         }
     }
 }
