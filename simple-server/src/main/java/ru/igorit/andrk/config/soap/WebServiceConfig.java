@@ -39,7 +39,7 @@ public class WebServiceConfig extends WsConfigurerAdapter {
     @Bean(name="openCloseSchema")
     public XsdSchema openCloseSchema(){
         return new SimpleXsdSchema(new ClassPathResource("OpenClose.xsd"));
-    };
+    }
 
     @Bean(name = "openCloseAcc")
     public DefaultWsdl11Definition defaultWsdl11Definition(

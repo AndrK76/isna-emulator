@@ -1,11 +1,9 @@
 package ru.igorit.andrk.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import ru.igorit.andrk.model.*;
 
 import java.util.List;
-import java.util.UUID;
 
 public interface MainStoreService {
     Request saveRequest(Request request);

@@ -8,7 +8,7 @@ public enum MtNodeCountMode {
     One("1..1"),
     Many("0..N"),
     Other("...");
-    private String name;
+    private final String name;
     MtNodeCountMode(String name){
         this.name=name;
     }

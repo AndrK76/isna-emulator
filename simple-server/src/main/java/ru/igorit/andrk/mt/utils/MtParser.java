@@ -110,7 +110,7 @@ public class MtParser {
     private enum FindCharMode {
         IN_FIND_FIRST_SYMBOL,
         IN_FIND_SECOND_SYMBOL,
-        AFTER_FIND_SYMBOLS;
+        AFTER_FIND_SYMBOLS
     }
 
     private static boolean clearSymbolsAtStart(List<Character> charArray,

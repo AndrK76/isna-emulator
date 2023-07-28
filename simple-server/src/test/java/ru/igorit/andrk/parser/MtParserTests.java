@@ -102,8 +102,8 @@ public class MtParserTests {
 
 
     private static class DataItemInfo {
-        private int countBlocks;
-        private Map<String, Object[]> values;
+        private final int countBlocks;
+        private final Map<String, Object[]> values;
 
         public DataItemInfo(int countBlocks, Map<String, Object[]> values) {
             this.countBlocks = countBlocks;

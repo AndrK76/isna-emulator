@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class DataContentException extends RuntimeException {
-    private String dataErrorMessage;
+    private final String dataErrorMessage;
 
     public DataContentException(String message, Throwable cause) {
         super(cause);

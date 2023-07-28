@@ -13,8 +13,7 @@ public class DataHandler {
         GregorianCalendar calendar = new GregorianCalendar();
         calendar.setTime(Timestamp.valueOf(date));
         try {
-            XMLGregorianCalendar result = DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
-            return result;
+            return DatatypeFactory.newInstance().newXMLGregorianCalendar(calendar);
         } catch (DatatypeConfigurationException e) {
             throw new RuntimeException(e);
         }
@@ -27,8 +26,7 @@ public class DataHandler {
     public static OffsetDateTime toTimeWithTZ(XMLGregorianCalendar xmlDate) {
         var gcDate = xmlDate.toGregorianCalendar();
         var zdt = gcDate.toZonedDateTime();
-        var instant = zdt.toInstant() ;
-        var ofDate = instant.atOffset(zdt.getOffset());
-        return ofDate;
+        var instant = zdt.toInstant();
+        return instant.atOffset(zdt.getOffset());
     }
 }

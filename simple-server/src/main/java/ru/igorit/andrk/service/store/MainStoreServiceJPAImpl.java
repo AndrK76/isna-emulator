@@ -150,7 +150,6 @@ public class MainStoreServiceJPAImpl implements MainStoreService {
             var requests = reqRepo.findAllByIdBetween(lowerId, highId)
                     .stream().collect(Collectors.toMap(k -> k.getId(), v -> v));
             ret.getContent().forEach(r -> r.setRawRequest(requests.get(r.getRawRequest().getId())));
-            System.out.println();
         }
         return ret;
     }

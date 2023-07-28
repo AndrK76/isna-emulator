@@ -38,7 +38,7 @@ public class MtComposerTests {
             node.getBlocks().add(block);
         });
 
-        LocalDateTime sampleDate = LocalDateTime.of(2023, 01, 02, 03, 04, 05, 06);
+        LocalDateTime sampleDate = LocalDateTime.of(2023, 1, 2, 3, 4, 5, 6);
         var idBlock = content.getNode("ID").getBlocks().get(0);
         idBlock.setItem(outFormat.getItem("reference"), "REF001");
         var subjBlock = content.getNode("SUBJECT").getBlocks().get(0);

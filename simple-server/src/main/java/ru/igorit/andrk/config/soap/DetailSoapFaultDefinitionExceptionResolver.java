@@ -11,7 +11,6 @@ import ru.igorit.andrk.config.services.ServiceFaultException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
-import javax.xml.namespace.QName;
 import java.time.LocalDateTime;
 
 import static ru.igorit.andrk.utils.DataHandler.toXmlDate;
@@ -21,8 +20,6 @@ public class DetailSoapFaultDefinitionExceptionResolver extends SoapFaultMapping
 
     private static final ObjectFactory FACTORY = new ObjectFactory();
     private final Marshaller marshaller;
-    private static final QName CODE = new QName("errorCode");
-    private static final QName MESSAGE = new QName("errorMessage");
 
     public DetailSoapFaultDefinitionExceptionResolver() throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(ErrorInfo.class);

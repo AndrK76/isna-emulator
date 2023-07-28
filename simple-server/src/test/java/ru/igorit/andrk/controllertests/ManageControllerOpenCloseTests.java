@@ -87,7 +87,7 @@ public class ManageControllerOpenCloseTests {
                 .andReturn();
         var responseString = requestRes.getResponse().getContentAsString();
 
-        if (id < COUNT_REQUESTS && storeInitiator.getOcRequests().stream().filter(r -> r.getId().equals(id)).findFirst().isPresent()) {
+        if (id < COUNT_REQUESTS && storeInitiator.getOcRequests().stream().anyMatch(r -> r.getId().equals(id))) {
             var actualId = (Integer) JsonPath.read(responseString, "$.id");
             assertThat(actualId.longValue()).isEqualTo(id);
             var responseContent = (OpenCloseRequestDTO) objectMapper.readValue(responseString, OpenCloseRequestDTO.class);
@@ -151,7 +151,7 @@ public class ManageControllerOpenCloseTests {
                 .andReturn();
         var responseString = requestRes.getResponse().getContentAsString();
 
-        if (id < COUNT_REQUESTS && storeInitiator.getOcResponses().stream().filter(r -> r.getId().equals(id)).findFirst().isPresent()) {
+        if (id < COUNT_REQUESTS && storeInitiator.getOcResponses().stream().anyMatch(r -> r.getId().equals(id))) {
             var actualId = (Integer) JsonPath.read(responseString, "$.id");
             assertThat(actualId.longValue()).isEqualTo(id);
             var responseContent = (OpenCloseResponseForRequestDTO) objectMapper.readValue(responseString, OpenCloseResponseForRequestDTO.class);

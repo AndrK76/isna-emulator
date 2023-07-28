@@ -86,10 +86,7 @@ public class MtContent {
                         findType == FindNodeType.ByCurrentCode ? r.getCurrentCode() : r.getFormat().getNodeName()
                 ))
                 .findFirst();
-        if (ret.isPresent()) {
-            return ret.get();
-        }
-        return null;
+        return ret.orElse(null);
     }
 
     public MtNode getNode(String code) {
@@ -108,7 +105,7 @@ public class MtContent {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    private class DumpInfo {
+    private static class DumpInfo {
         private String name;
         private String value;
         private int nodeOrder;
@@ -118,16 +115,15 @@ public class MtContent {
     public String dumpValues() {
         var ret = new ArrayList<DumpInfo>();
         for (var block : getBlocks()) {
-            block.getValues().entrySet().stream().forEach(r ->
-                    ret.add(new DumpInfo(
-                            r.getKey().getCode(),
-                            r.getValue(),
-                            block.getOwnerNode().getOrder(),
-                            block.getId()
-                    )));
+            block.getValues().forEach((key, value) -> ret.add(new DumpInfo(
+                    key.getCode(),
+                    value,
+                    block.getOwnerNode().getOrder(),
+                    block.getId()
+            )));
         }
-        var nl$ = System.lineSeparator();
-        StringBuilder sb = new StringBuilder("Value:" + nl$);
+        var lineSeparator = System.lineSeparator();
+        StringBuilder sb = new StringBuilder("Value:" + lineSeparator);
         ret.stream()
                 .sorted(Comparator.comparing(DumpInfo::getNodeOrder)
                         .thenComparing(DumpInfo::getBlockOrder)

@@ -14,22 +14,20 @@ import java.util.List;
 public class MtComposer {
 
     public static String Compose(MtContent content) {
-        String nl$ = System.lineSeparator();
+        String lineSeparator = System.lineSeparator();
         StringBuilder bld = new StringBuilder();
         content.getNodeList().stream()
                 .sorted(Comparator.comparing(MtNode::getOrder))
-                .forEach(node -> {
-                    node.getBlocks().stream()
-                            .sorted(Comparator.comparing(MtBlock::getId))
-                            .forEach(block -> {
-                                var composed = composeBlockText(block);
-                                bld.append(nl$);
-                                bld.append(composed);
-                            });
-                });
+                .forEach(node -> node.getBlocks().stream()
+                        .sorted(Comparator.comparing(MtBlock::getId))
+                        .forEach(block -> {
+                            var composed = composeBlockText(block);
+                            bld.append(lineSeparator);
+                            bld.append(composed);
+                        }));
         String ret = bld.toString();
         if (!ret.isEmpty()){
-            ret = ret.substring(nl$.length());
+            ret = ret.substring(lineSeparator.length());
         }
         return "{"+ret+"-}";
     }
@@ -37,7 +35,6 @@ public class MtComposer {
 
     private static String composeBlockText(MtBlock block) {
         StringBuilder sb = new StringBuilder();
-        String splitter = block.getText().split("~")[0];
         String fmtStr = block.getText().split("~")[1];
         var values = block.getValues();
         int fmtPos = 0;
