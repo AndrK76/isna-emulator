@@ -106,9 +106,8 @@ public class MtConfigParser {
     }
 
     public static NodeList getCustomSection(byte[] configData, String sectionName) {
-        Document cfgDoc = null;
         try {
-            cfgDoc = getXmlDoc(configData);
+            Document cfgDoc = getXmlDoc(configData);
             return cfgDoc.getElementsByTagName(sectionName);
         } catch (Exception e) {
             throw new ConfigFormatException(e);
@@ -122,7 +121,7 @@ public class MtConfigParser {
     }
 
     public static Document getXmlDoc(byte[] configData) throws ParserConfigurationException, IOException, SAXException {
-        Document cfgDoc = null;
+        Document cfgDoc;
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder bld = factory.newDocumentBuilder();
         try (InputStream is = new ByteArrayInputStream(configData)) {
@@ -164,14 +163,15 @@ public class MtConfigParser {
     }
 
     private static MtNodeCountMode parseNode(String countText) {
-        if (countText.equals("N")) {
-            return MtNodeCountMode.Many;
-        } else if (countText.equals("1")) {
-            return MtNodeCountMode.One;
-        } else if (countText.equals("0")) {
-            return MtNodeCountMode.ZeroOrOne;
-        } else {
-            return MtNodeCountMode.Other;
+        switch (countText) {
+            case "N":
+                return MtNodeCountMode.Many;
+            case "1":
+                return MtNodeCountMode.One;
+            case "0":
+                return MtNodeCountMode.ZeroOrOne;
+            default:
+                return MtNodeCountMode.Other;
         }
     }
 

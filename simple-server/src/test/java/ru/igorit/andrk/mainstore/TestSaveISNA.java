@@ -17,8 +17,6 @@ import ru.igorit.andrk.service.MainStoreService;
 import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
 import javax.sql.DataSource;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @DataJpaTest
 @DirtiesContext

@@ -1,12 +1,10 @@
 package ru.igorit.andrk.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
-import ru.igorit.andrk.model.OpenCloseRequest;
 import ru.igorit.andrk.model.OpenCloseRequestAccount;
 
 import java.time.LocalDateTime;
@@ -31,20 +29,20 @@ public class OpenCloseRequestAccountDTO {
     private String accountOld;
     private LocalDateTime dateModify;
     public static OpenCloseRequestAccountDTO create(OpenCloseRequestAccount account){
-        var ret = new OpenCloseRequestAccountDTO();
-        ret.id = account.getId();
-        ret.sort = account.getSort();
-        ret.bic = account.getBic();
-        ret.account = account.getAccount();
-        ret.accountType = account.getAccountType();
-        ret.operType = account.getOperType();
-        ret.operDate = account.getOperDate();
-        ret.rnn = account.getRnn();
-        ret.dog = account.getDog();
-        ret.dogDate = account.getDogDate();
-        ret.bicOld = account.getBicOld();
-        ret.accountOld = account.getAccountOld();
-        ret.dateModify = account.getDateModify();
-        return ret;
+        return OpenCloseRequestAccountDTO.builder()
+                .id(account.getId())
+                .sort(account.getSort())
+                .bic(account.getBic())
+                .account(account.getAccount())
+                .accountType(account.getAccountType())
+                .operType(account.getOperType())
+                .operDate(account.getOperDate())
+                .rnn(account.getRnn())
+                .dog(account.getDog())
+                .dogDate(account.getDogDate())
+                .bicOld(account.getBicOld())
+                .accountOld(account.getAccountOld())
+                .dateModify(account.getDateModify())
+                .build();
     }
 }

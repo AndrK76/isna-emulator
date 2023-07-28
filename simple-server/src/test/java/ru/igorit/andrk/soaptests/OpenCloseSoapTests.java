@@ -6,10 +6,8 @@ import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.webservices.server.WebServiceServerTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.ws.NoEndpointFoundException;
 import org.springframework.ws.test.server.MockWebServiceClient;
 import org.springframework.xml.transform.StringSource;
-import ru.igorit.andrk.config.services.Constants;
 import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.model.Response;
 import ru.igorit.andrk.service.MainStoreService;
@@ -123,9 +121,6 @@ public class OpenCloseSoapTests {
                 .hasMessageContaining("No endpoint can be found");
         assertThat(requests.size()).isEqualTo(0);
         assertThat(responses.size()).isEqualTo(0);
-
-        System.out.println();
-
     }
 
 

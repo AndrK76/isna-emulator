@@ -17,10 +17,11 @@ public class OpenCloseDynamicSettings {
     private boolean validateAccountState = false;
     private boolean validateOperationDate = false;
     private boolean raiseTestError = false;
-
     private boolean useFixReference = false;
-
     private String fixReference = "";
+    private boolean raiseServerError = false;
+    private boolean raiseFormatError = false;
+
 
     public static OpenCloseDynamicSettings create(List<StoredSetting> storedSettings) {
         var ret = new OpenCloseDynamicSettings();
@@ -34,6 +35,8 @@ public class OpenCloseDynamicSettings {
         ret.raiseTestError = getStoredBool(stored, "RaiseTestError", ret.raiseTestError);
         ret.useFixReference = getStoredBool(stored, "UseFixReference", ret.useFixReference);
         ret.fixReference = getStoredString(stored, "FixReference", ret.fixReference);
+        ret.raiseServerError = getStoredBool(stored, "RaiseServerError", ret.raiseServerError);
+        ret.raiseFormatError = getStoredBool(stored, "RaiseFormatError", ret.raiseFormatError);
         return ret;
     }
 

@@ -1,7 +1,5 @@
 package ru.igorit.andrk.mainstore;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -9,14 +7,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.ArgumentsProvider;
 import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.json.AutoConfigureJson;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import ru.igorit.andrk.model.StoredSetting;
 import ru.igorit.andrk.model.StoredSettingKey;
-import ru.igorit.andrk.repository.main.*;
+import ru.igorit.andrk.repository.main.SettingRepository;
 import ru.igorit.andrk.service.MainStoreService;
 import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
@@ -69,10 +66,9 @@ public class TestSetting {
     }
 
     private MainStoreService getStoreService() {
-        var svc = MainStoreServiceJPAImpl.builder()
+        return MainStoreServiceJPAImpl.builder()
                 .setRepo(repo)
                 .build();
-        return svc;
     }
 
 

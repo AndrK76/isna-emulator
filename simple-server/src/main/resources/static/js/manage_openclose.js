@@ -1,7 +1,8 @@
 $.ajaxSetup({contentType: "application/json; charset=utf-8"});
 
 let checkNames = ["CheckUniqueMessageId", "CheckUniqueReference", "ValidateAccountState",
-    "ValidateOperationDate", "RaiseTestError", "UseFixReference"];
+    "ValidateOperationDate", "RaiseTestError", "RaiseServerError", "RaiseFormatError",
+    "UseFixReference"];
 
 let strNames = ["FixReference"];
 
@@ -34,9 +35,9 @@ function setCheckName(element) {
     let descrEl = $('#lbl' + element);
     let val = $(checkEl).is(':checked') ? "Включено" : "Выключено";
     descrEl.text(val);
-    if (element == 'UseFixReference'){
+    if (element == 'UseFixReference') {
         let strEl = $('#FixReference');
-        strEl.prop( "disabled", ! $(checkEl).is(':checked') );
+        strEl.prop("disabled", !$(checkEl).is(':checked'));
     }
 }
 

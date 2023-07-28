@@ -28,7 +28,7 @@ public class MtItem {
 
     public static MtItem parse(String format) {
         if (format == null || format.length() == 0) {
-            throw new ConfigFormatException(String.format("Обнаружен пустой формат", format));
+            throw new ConfigFormatException("Обнаружен пустой формат");
         }
         var fields = format.split(":");
         if (fields.length < 5) {
@@ -52,12 +52,10 @@ public class MtItem {
         if (type == MtItemType.DATE) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatString);
             try {
-                LocalDateTime ret = LocalDateTime.parse(value, formatter);
-                return ret;
+                return LocalDateTime.parse(value, formatter);
             } catch (DateTimeParseException e) {
                 if (e.getCause() != null && e.getCause() instanceof DateTimeException) {
-                    LocalDateTime ret = LocalDate.parse(value, formatter).atStartOfDay();
-                    return ret;
+                    return LocalDate.parse(value, formatter).atStartOfDay();
                 } else {
                     throw (e);
                 }
@@ -65,8 +63,7 @@ public class MtItem {
 
             }
         } else if (type == MtItemType.INTEGER) {
-            Integer ret = Integer.parseInt(value);
-            return ret;
+            return Integer.parseInt(value);
         }
         return value;
     }

@@ -17,14 +17,14 @@ public class RequestMapper {
             reqDate = DataHandler.toTimeWithTZ(xmlDate);
         }
 
-        var ret = new Request(
+        return new Request(
                 null,
                 UUID.fromString(soapInfo.getMessageId()),
                 soapInfo.getCorrelationId() == null ? null : UUID.fromString(soapInfo.getCorrelationId()),
                 soapInfo.getServiceId(),
                 reqDate,
+                //оставляем (String) - В исходно XSD это был не String
                 (String) soap.getRequestData().getData());
-        return ret;
     }
 
 }

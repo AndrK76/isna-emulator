@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import ru.igorit.andrk.model.*;
@@ -17,14 +16,10 @@ import ru.igorit.andrk.repository.main.RequestRepository;
 import ru.igorit.andrk.service.MainStoreService;
 import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
-import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.Assertions.assertThatNoException;
 
 @DataJpaTest
 @DirtiesContext
@@ -134,21 +129,21 @@ public class TestOpenCloseResponseRepo {
         String[] accountNums = new String[]{"ACC001", "ACC002", "ACC003", "ACC004"};
         String[] operResults = new String[]{"01", "99"};
         LocalDateTime[] dates = new LocalDateTime[]{
-                LocalDateTime.of(2023, 01, 01, 01, 00),
-                LocalDateTime.of(2023, 01, 01, 02, 00),
-                LocalDateTime.of(2023, 01, 01, 03, 00),
+                LocalDateTime.of(2023, 1, 1, 1, 0),
+                LocalDateTime.of(2023, 1, 1, 2, 0),
+                LocalDateTime.of(2023, 1, 1, 3, 0),
         };
         OpenCloseResponseAccount expectedAccount = null;
 
         for (int i = 0; i < dates.length; i++) {
             for (int operType = 1; operType < 3; operType++) {
-                for (int operRes = 0; operRes < operResults.length; operRes++) {
+                for (String operResult : operResults) {
                     var request = svc.saveRequest(CommonCreators.makeMainRequest());
                     entityManager.detach(request);
                     var ocReq = svc.saveOpenCloseRequest(makeOCRequest(request, dates[i], operType, accountNums));
                     entityManager.detach(ocReq);
                     var ocResp = makeOCResponse(ocReq);
-                    String res = operResults[operRes];
+                    String res = operResult;
                     ocResp.getAccounts().forEach(r -> r.setResultCode(res));
                     svc.saveOpenCloseResponse(ocResp);
                     entityManager.detach(ocResp);

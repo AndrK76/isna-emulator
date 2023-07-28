@@ -1,7 +1,6 @@
 package ru.igorit.andrk.api;
 
 import io.swagger.v3.oas.annotations.Operation;
-import org.apache.catalina.Store;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -10,10 +9,6 @@ import ru.igorit.andrk.dto.*;
 import ru.igorit.andrk.model.*;
 import ru.igorit.andrk.service.MainStoreService;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,7 +48,7 @@ public class ManageController {
         }
         RequestDto ret = RequestDto.create(request, true);
         var responses = mainStore.getResponsesForRequests(List.of(request));
-        if (responses.size() > 0) {
+        if (!responses.isEmpty()) {
             ret.setResponse(ResponseForRequestDTO.create(responses.get(0), true));
         }
         return ret;
@@ -103,8 +98,7 @@ public class ManageController {
         if (request == null) {
             return null;
         }
-        OpenCloseRequestDTO ret = OpenCloseRequestDTO.create(request, true);
-        return ret;
+        return OpenCloseRequestDTO.create(request, true);
     }
 
     @GetMapping("/opencloserequest/{id}/getnewest")
@@ -121,8 +115,7 @@ public class ManageController {
         if (response == null) {
             return null;
         }
-        OpenCloseResponseForRequestDTO ret = OpenCloseResponseForRequestDTO.create(response, true);
-        return ret;
+        return OpenCloseResponseForRequestDTO.create(response, true);
     }
 
     @GetMapping("/setting/{service}")

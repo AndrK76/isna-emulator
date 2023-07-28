@@ -16,7 +16,7 @@ import ru.igorit.andrk.service.MainStoreService;
 import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
 import javax.sql.DataSource;
-import java.time.OffsetDateTime;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -80,7 +80,7 @@ public class TestRequestRepo {
         int lastPartitionSize = 0;
         for (int i = 0; i < Math.ceil((double) totalSize / partitionSize); i++) {
             var page = svc.getRequests(pos, partitionSize);
-            pos = page.stream().min((o1, o2) -> o1.getId().compareTo(o2.getId())).get().getId();
+            pos = page.stream().min(Comparator.comparing(Request::getId)).get().getId();
             var actualPartitionSize = page.getContent().size();
             if (i == 0) {
                 var actualTotal = page.getTotalElements();
@@ -116,7 +116,6 @@ public class TestRequestRepo {
             idValues.put(i, svc.saveRequest(CommonCreators.makeMainRequest()).getId());
         }
         for (int i = 0; i < sampleSize; i++) {
-            var dlt = sampleSize - offset;
             var val = svc.getIdForNewestRequestWithOffset(idValues.get(i), offset);
             if (i < sampleSize - offset) {
                 assertThat(val)

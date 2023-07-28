@@ -24,7 +24,9 @@ import ru.igorit.andrk.service.MainStoreService;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,7 +37,6 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static ru.igorit.andrk.config.services.Constants.API_VERSION;
 
@@ -83,8 +84,8 @@ public class ManageControllerSettingsTests {
         when(mainStoreService.getSetting(any(StoredSettingKey.class)))
                 .thenAnswer(invocation -> {
                     StoredSettingKey key = (StoredSettingKey) invocation.getArguments()[0];
-                    var ret = sampleData.stream().filter(r -> r.getId().equals(key)).findFirst();
-                    return ret.orElse(null);
+                    return sampleData.stream().filter(r -> r.getId().equals(key))
+                            .findFirst().orElse(null);
                 });
         when(mainStoreService.saveSetting(any(StoredSetting.class)))
                 .thenAnswer((Answer<StoredSetting>) invocation -> {

@@ -1,6 +1,5 @@
 package ru.igorit.andrk.dto;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -9,10 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.*;
 import lombok.extern.jackson.Jacksonized;
 import ru.igorit.andrk.model.StoredSetting;
-import ru.igorit.andrk.model.StoredSettingKey;
-import ru.igorit.andrk.service.MainStoreService;
 
-import javax.persistence.Transient;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,9 +43,8 @@ public class StoredSettingDTO {
     }
 
     public void actualizeValue(){
-        String str = null;
         try {
-            str = objectMapper.writeValueAsString(this.getValue());
+            String str = objectMapper.writeValueAsString(this.getValue());
             this.setValue(objectMapper.readValue(str, this.getValueType()));
         } catch (JsonProcessingException e) {
         }

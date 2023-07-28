@@ -11,12 +11,10 @@ import java.util.stream.Collectors;
 @Configuration
 public class ProcessorConfig {
 
-    private List<DataProcessor> processors;
-
-    private Map<String,DataProcessor> processorMap;
+    private final Map<String,DataProcessor> processorMap;
 
     public ProcessorConfig(List<DataProcessor> processors) {
-        this.processors = processors;
+        //this.processors = processors;
         processorMap = processors.stream().collect(Collectors.toMap(DataProcessor::document, p->p));
     }
 
