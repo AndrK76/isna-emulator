@@ -62,7 +62,6 @@ public class OpenCloseProcessorTests {
         var resValues = processor.initResultValues(getConfig());
         String[] expectedResults = {"SUCCESS", "TEST_ERROR"};
         assertThat(resValues.keySet()).contains(expectedResults);
-        System.out.println();
     }
 
     @Test

@@ -7,7 +7,7 @@ public enum MtItemType {
     DATE("d"),
     INTEGER("i");
     @Getter
-    private String code;
+    private final String code;
 
     MtItemType(String code){
         this.code=code;

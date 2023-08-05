@@ -44,6 +44,13 @@ public class OpenCloseProcessor implements DataProcessor {
         try {
 
             OpenCloseDynamicSettings dynSettings = OpenCloseDynamicSettings.create(mainStoreService.getSettingsByGroup(this.document()));
+            if (dynSettings.isRaiseServerError()){
+                throw processError(new ConfigFormatException("Тестовая ошибка сервиса"), "SVC_TEST_ERROR");
+            }
+            if (dynSettings.isRaiseFormatError()){
+                return ProcessResult.errorResult();
+            }
+
 
             String data = request.getData();
             MtContent inputContent, outputContent;

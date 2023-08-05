@@ -124,7 +124,7 @@ public class FullStorageInitiator {
                 .thenAnswer((Answer<Request>) invocation -> {
                     Long id = (Long) invocation.getArguments()[0];
                     return requests.stream()
-                            .filter(r -> r.getId() == id)
+                            .filter(r -> r.getId().longValue() == id)
                             .findFirst().orElse(null);
                 });
         when(mainStoreService.getIdForNewestRequestWithOffset(any(), anyInt()))
@@ -135,7 +135,7 @@ public class FullStorageInitiator {
                             .filter(r -> r.getId() > currRequestId)
                             .sorted(Comparator.comparing(Request::getId))
                             .skip(offset).findFirst();
-                    return retRequest.isPresent() ? retRequest.get().getId() : null;
+                    return retRequest.map(Request::getId).orElse(null);
                 });
         if (initOpenClose) {
             when(mainStoreService.getOpenCloseRequests(any(), anyInt()))
@@ -154,7 +154,7 @@ public class FullStorageInitiator {
                     .thenAnswer((Answer<OpenCloseRequest>) invocation -> {
                         Long id = (Long) invocation.getArguments()[0];
                         return ocRequests.stream()
-                                .filter(r -> r.getId() == id)
+                                .filter(r -> r.getId().longValue() == id)
                                 .findFirst().orElse(null);
                     });
             when(mainStoreService.getIdForNewestOpenCloseRequestWithOffset(any(), anyInt()))
@@ -165,13 +165,13 @@ public class FullStorageInitiator {
                                 .filter(r -> r.getId() > currRequestId)
                                 .sorted(Comparator.comparing(OpenCloseRequest::getId))
                                 .skip(offset).findFirst();
-                        return retRequest.isPresent() ? retRequest.get().getId() : null;
+                        return retRequest.map(OpenCloseRequest::getId).orElse(null);
                     });
             when(mainStoreService.getOpenCloseResponseById(any(), anyBoolean()))
                     .thenAnswer((Answer<OpenCloseResponse>) invocation -> {
                         Long id = (Long) invocation.getArguments()[0];
                         return ocResponses.stream()
-                                .filter(r -> r.getId() == id)
+                                .filter(r -> r.getId().longValue() == id)
                                 .findFirst().orElse(null);
                     });
         }

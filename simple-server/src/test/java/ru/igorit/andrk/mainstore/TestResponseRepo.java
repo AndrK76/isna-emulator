@@ -76,7 +76,7 @@ public class TestResponseRepo {
         int minBoundStep = 10, maxBoundStep = 80;
         long minBound = 0L, maxBound = 0L;
         for (int i = 1; i <= totalSize; i++) {
-            long curReqId = 0;
+            long curReqId;
             if (i % 2 == 0) {
                 var res = svc.saveResponse(CommonCreators.makeMainResponse(CommonCreators.makeMainRequest()));
                 curReqId = res.getRequest().getId();

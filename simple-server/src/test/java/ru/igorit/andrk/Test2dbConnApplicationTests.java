@@ -23,7 +23,6 @@ class Test2dbConnApplicationTests {
     void testThatStoreServiceCorrectSaveRequests() {
         var request = CommonCreators.makeMainRequest();
         var request2 = storeSvc.saveRequest(request);
-        System.out.println("");
     }
 
     //@Test
@@ -39,7 +38,6 @@ class Test2dbConnApplicationTests {
             var total = page.getTotalElements();
             var size = page.getContent().size();
             var size2 = page.getSize();
-            System.out.println("");
         }
 
     }

@@ -2,34 +2,29 @@ package ru.igorit.andrk.api;
 
 
 import kz.icode.gov.integration.kgd.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.ws.server.endpoint.annotation.Endpoint;
 import org.springframework.ws.server.endpoint.annotation.PayloadRoot;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 import org.springframework.ws.server.endpoint.annotation.ResponsePayload;
-import ru.igorit.andrk.config.services.Constants;
+import ru.igorit.andrk.service.MainStoreService;
 import ru.igorit.andrk.service.processor.ProcessResult;
 import ru.igorit.andrk.service.processor.ProcessorException;
 import ru.igorit.andrk.service.processor.ProcessorFactory;
-import ru.igorit.andrk.service.MainStoreService;
 import ru.igorit.andrk.utils.RequestMapper;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.namespace.QName;
-
 import java.util.UUID;
 
-import static java.time.LocalDateTime.now;
 import static ru.igorit.andrk.config.services.Constants.DEFAULT_NAMESPACE;
 import static ru.igorit.andrk.config.services.Constants.SEND_MESSAGE;
 import static ru.igorit.andrk.utils.DataHandler.toXmlDate;
 
 @Endpoint
+@Log4j2
 public class OpenCloseEndpoint {
 
-    private static final Logger log = LoggerFactory.getLogger(OpenCloseEndpoint.class);
 
     private final MainStoreService mainStoreService;
     private final ProcessorFactory processors;
@@ -46,7 +41,7 @@ public class OpenCloseEndpoint {
     @PayloadRoot(namespace = DEFAULT_NAMESPACE, localPart = SEND_MESSAGE)
     @ResponsePayload
     public JAXBElement<SendMessageResponse> sendMessage(
-            @RequestPayload JAXBElement<SendMessage> message) throws DatatypeConfigurationException {
+            @RequestPayload JAXBElement<SendMessage> message) {
         var msg = message.getValue();
 
         var req = RequestMapper.toModel(msg.getRequest());
@@ -61,10 +56,10 @@ public class OpenCloseEndpoint {
         UUID messageId;
         try {
             var msgId = msg.getRequest().getRequestInfo().getMessageId();
-            messageId = UUID.fromString(msgId);
-            if (messageId == null) {
+            if (msgId == null || msgId.isEmpty()) {
                 throw new IllegalArgumentException("Message id is empty");
             }
+            messageId = UUID.fromString(msgId);
         } catch (IllegalArgumentException e) {
             throw raiseProcessException(req, "SVC_ERRFORMAT", "Ошибка в номере сообщения", e);
         }

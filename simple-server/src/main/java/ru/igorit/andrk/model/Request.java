@@ -2,13 +2,9 @@ package ru.igorit.andrk.model;
 
 
 import lombok.*;
-
 import org.hibernate.annotations.Type;
-import org.hibernate.type.UUIDCharType;
 import org.springframework.lang.NonNull;
 
-
-import javax.annotation.Generated;
 import javax.persistence.*;
 import java.time.OffsetDateTime;
 import java.util.UUID;

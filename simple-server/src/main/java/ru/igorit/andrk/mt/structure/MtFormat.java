@@ -9,9 +9,9 @@ import java.util.Map;
 
 @Getter
 public class MtFormat {
-    private List<MtFormatNodeInfo> nodes = new ArrayList<>();
-    private Map<String,MtBlockFormat> previewFormats = new HashMap<>();
-    private Map<String,MtBlockFormat> detailFormats = new HashMap<>();
+    private final List<MtFormatNodeInfo> nodes = new ArrayList<>();
+    private final Map<String,MtBlockFormat> previewFormats = new HashMap<>();
+    private final Map<String,MtBlockFormat> detailFormats = new HashMap<>();
 
     private final Map<String, MtItem> items = new HashMap<>();
 

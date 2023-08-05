@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.TestPropertySource;
 import ru.igorit.andrk.model.OpenCloseRequest;
-import ru.igorit.andrk.model.OpenCloseRequestAccount;
-import ru.igorit.andrk.model.Request;
 import ru.igorit.andrk.repository.main.OpenCloseRequestRepository;
 import ru.igorit.andrk.repository.main.RequestRepository;
 import ru.igorit.andrk.service.MainStoreService;
@@ -17,12 +15,6 @@ import ru.igorit.andrk.service.store.MainStoreServiceJPAImpl;
 
 import javax.persistence.EntityManager;
 import javax.sql.DataSource;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.util.Random;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -96,7 +88,7 @@ public class TestOpenCloseRequestRepo {
         assertThatThrownBy(() -> {
             var ocReq1 = svc.getOpenCloseRequestById(ocReqId);
             entityManager.detach(ocReq1);
-            var size = ocReq1.getAccounts().size();
+            ocReq1.getAccounts().size();
         }).isInstanceOf(LazyInitializationException.class);
 
         assertThatNoException().isThrownBy(() -> {

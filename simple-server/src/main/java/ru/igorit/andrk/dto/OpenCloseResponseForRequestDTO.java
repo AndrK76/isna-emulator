@@ -3,7 +3,6 @@ package ru.igorit.andrk.dto;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.*;
 import lombok.extern.jackson.Jacksonized;
-import ru.igorit.andrk.model.OpenCloseRequestAccount;
 import ru.igorit.andrk.model.OpenCloseResponse;
 import ru.igorit.andrk.model.OpenCloseResponseAccount;
 

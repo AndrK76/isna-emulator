@@ -1,7 +1,6 @@
 package ru.igorit.andrk.api;
 
 import lombok.extern.log4j.Log4j2;
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
@@ -22,8 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static ru.igorit.andrk.config.services.Constants.*;
 
@@ -31,16 +30,16 @@ import static ru.igorit.andrk.config.services.Constants.*;
 @Controller
 public class MainController implements ErrorController {
 
-    private static Map<String, String> listModes = new HashMap<>();
-    private static Map<String, String> manageModes = new HashMap<>();
-    private static Map<String, String> serviceNames = new HashMap<>();
-
-    static {
-        listModes.put("general", "Все запросы");
-        listModes.put("open-close", "Уведомления об открытии, закрытии и изменении счетов");
-        manageModes.put("open-close", "Уведомления об открытии, закрытии и изменении счетов");
-        serviceNames.put("open-close", OPEN_CLOSE_SERVICE);
-    }
+    private final Map<String, String> listModes = Map.of(
+            "general", "Все запросы",
+            "open-close", "Уведомления об открытии, закрытии и изменении счетов"
+    );
+    private final Map<String, String> manageModes = Map.of(
+            "open-close", "Уведомления об открытии, закрытии и изменении счетов"
+    );
+    private final Map<String, String> serviceNames = Map.of(
+            "open-close", OPEN_CLOSE_SERVICE
+    );
 
     private final int docPerPage;
     private final ProcessorFactory processorFactory;
@@ -55,7 +54,7 @@ public class MainController implements ErrorController {
     public String index(Model model) throws MalformedURLException {
         URL url = new URL(ServletUriComponentsBuilder.fromCurrentContextPath().toUriString());
         String host = url.getHost();
-        Integer port = url.getPort();
+        int port = url.getPort();
         String protocol = url.getProtocol();
 
         model.addAttribute("restApiVersion", API_VERSION);
@@ -72,8 +71,8 @@ public class MainController implements ErrorController {
         HttpStatus statusCode = HttpStatus.resolve(Integer.parseInt(status.toString()));
 
 
-        model.addAttribute("code", status.toString());
-        model.addAttribute("name", statusCode.getReasonPhrase());
+        model.addAttribute("code", Optional.of(status).map(Object::toString).orElse(null));
+        model.addAttribute("name", Optional.ofNullable(statusCode).map(HttpStatus::getReasonPhrase).orElse(null));
         return "error";
     }
 
@@ -82,7 +81,7 @@ public class MainController implements ErrorController {
 
         HttpStatus statusCode = HttpStatus.resolve(404);
         model.addAttribute("code", "404");
-        model.addAttribute("name", statusCode.getReasonPhrase());
+        model.addAttribute("name", Optional.ofNullable(statusCode).map(HttpStatus::getReasonPhrase).orElse(null));
         return "error";
     }
 
@@ -125,7 +124,7 @@ public class MainController implements ErrorController {
     }
 
     @GetMapping("/api")
-    public String swagger(Model model) {
+    public String swagger() {
         return "api";
     }
 }

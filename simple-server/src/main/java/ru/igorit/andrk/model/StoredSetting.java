@@ -40,7 +40,7 @@ public class StoredSetting {
             }
             this.value = objectMapper.writeValueAsString(value);
             try{
-                var val = objectMapper.readValue(this.value, this.getValueType());
+               objectMapper.readValue(this.value, this.getValueType());
             } catch (MismatchedInputException e)
             {
                 this.valueType = value.getClass();
