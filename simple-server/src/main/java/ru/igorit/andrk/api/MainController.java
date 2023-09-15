@@ -35,7 +35,8 @@ public class MainController implements ErrorController {
             "open-close", "Уведомления об открытии, закрытии и изменении счетов"
     );
     private final Map<String, String> manageModes = Map.of(
-            "open-close", "Уведомления об открытии, закрытии и изменении счетов"
+            "open-close", "Уведомления об открытии, закрытии и изменении счетов",
+            "doc-sender","Отправка документов в БД"
     );
     private final Map<String, String> serviceNames = Map.of(
             "open-close", OPEN_CLOSE_SERVICE

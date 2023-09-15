@@ -50,7 +50,9 @@
                 </li>
                 <li class="nav-item" th:if="${page} == 'manage'">
                     <a th:if="${mode} == 'open-close'" class="btn btn-sm btn-light selected-page" href="/manage?mode=open-close">Открытие/закрытие</a>
-                    <a th:unless="${mode} == 'open-close'" class="btn btn-sm btn-secondary noselected-page" href="list?mode=open-close">Открытие/закрытие</a>
+                    <a th:unless="${mode} == 'open-close'" class="btn btn-sm btn-secondary noselected-page" href="manage?mode=open-close">Открытие/закрытие</a>
+                    <a th:if="${mode} == 'doc-sender'" class="btn btn-sm btn-light selected-page" href="/manage?mode=doc-sender">Загрузка документов</a>
+                    <a th:unless="${mode} == 'doc-sender'" class="btn btn-sm btn-secondary noselected-page" href="manage?mode=doc-sender">Загрузка документов</a>
                 </li>
                 <li class="nav-item">
                     <a class="btn btn-sm btn-secondary noselected-page" href="/api">API</a>

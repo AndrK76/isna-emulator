@@ -24,6 +24,9 @@
 <div th:if="${mode} == 'open-close'">
     <div th:replace="fragments/manage/open-close.html :: open_close_form"/>
 </div>
+<div th:if="${mode} == 'doc-sender'">
+    <div th:replace="fragments/manage/doc-sender.html :: send_form"/>
+</div>
 
 
 </body>

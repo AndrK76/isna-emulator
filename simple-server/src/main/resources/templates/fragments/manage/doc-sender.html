@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="container" th:fragment="send_form">
+    <div class="mt-3 row">
+        <form method="POST" enctype="multipart/form-data" id="sendForm">
+            <label class="form-label">Файл для загрузки в БД</label>
+            <div class="mb-3 row">
+                <label for="fileDescription" class="col-sm-2 col-form-label">Описание</label>
+                <div class="col-10">
+                    <input type="text" class="form-control form-control-sm" id="fileDescription" name="description">
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="fileType" class="col-sm-2 col-form-label">Тип файла</label>
+                <div class="col-10">
+                    <select class="form-select form-select-sm" name="fileType" id="fileType">
+                        <option selected>Типы файлов</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <label for="file" class="col-sm-2 col-form-label">Файл</label>
+                <div class="col-10">
+                    <input class="form-control-sm form-control" type="file" name="file" id="file">
+                </div>
+            </div>
+            <div class="mb-3 row">
+                <div class="col-12 text-end">
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="addFile()">
+                        Добавить файл в список доступных
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script src="/js/manage_docsender.js"></script>
+    <div id="result_div">qqqqq</div>
+</div>
+
+</body>
+</html>
