@@ -1,1 +1,1 @@
-docker-compose -f build-pg.yml stop
+docker-compose -f build-isna.yml stop

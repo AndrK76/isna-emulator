@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  db-postgre:
+  db-isna-postgre:
     image: postgres:14.1-alpine
     container_name: isna-postgre
     restart: always

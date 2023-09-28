@@ -1,6 +1,5 @@
 package ru.igorit.andrk.api;
 
-import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +26,7 @@ public class ManageController {
         this.docPerPage = docPerPage;
     }
 
-    @Operation(summary = "All requests")
+    //@Operation(summary = "All requests")
     @GetMapping("/request")
     public Page<RequestDto> getRequests(
             @RequestParam(required = false) Long after,

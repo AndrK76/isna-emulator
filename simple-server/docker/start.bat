@@ -1,1 +1,1 @@
-docker-compose -f build-pg.yml start
+docker-compose -f build-isna.yml start

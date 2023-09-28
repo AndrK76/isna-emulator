@@ -1,2 +1,2 @@
-docker-compose -f build-pg.yml down
+docker-compose -f build-isna.yml down
 docker volume rm docker_isna-data
